@@ -1,0 +1,153 @@
+html, body {
+  font-family: Indie Flower, sans;
+  text-align: center;
+  height: 100%;
+  padding: 0;
+  color: #36393B;
+  background: #DBDBDB;
+}
+
+div {
+  margin: 0;
+}
+
+a {
+  color: rgb(150,0,0);
+}
+
+#game-choice {
+	font-size: 30px;
+	font-family: 'Slabo 27px', sans-serif;
+	margin: 0;
+}
+
+.game-table {
+	margin: 3vh auto 3vh auto;
+	text-align: center;
+}
+
+.game-square {
+	display: inline-block;
+	position: relative;
+	width: 12%;
+	padding-bottom: 12%;
+	margin: 3px;
+	background: #36393B;
+	border: 5px solid rgba(150,20,20,1);
+}
+
+.no-select {
+	-webkit-touch-callout: none;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.game-square > .game-content {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	font-size: 7vw;
+  color: white;
+	-moz-text-shadow: 1px 1px 1px rgba(0,0,0,.9);
+	-webkit-text-shadow: 1px 1px rgba(0,0,0,.9);
+	-ms-text-shadow: 1px 1px rgba(0,0,0,.9);
+	text-shadow: 1px 1px 1px rgba(0,0,0,.9);
+}
+
+.player-choices {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.player-choices > li {
+  text-align: center;
+  display: inline-block;
+  padding: 5px;
+}
+
+.player-choice-text {
+  font-family: 'Indie Flower';
+  position: inline-block;
+	font-size: 18px;
+}
+
+
+.pop-up {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.3);
+}
+
+.pop-up-window {
+  width: 50%;
+  overflow-y: hidden;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px;
+  position: relative;
+  background: white;
+  border-top: 4px solid rgba(200,0,0,1);
+  box-shadow: 2px 2px 2px rgba(0,0,0,.3),
+  -2px 2px 2px rgba(0,0,0,.3);
+  font-size: 18px;
+  font-family: 'Slabo 27px', serif;
+  top: -100;
+  animation: easeDown 0.5s ease 0s 1 normal forwards;
+}
+
+@keyframes easeDown {
+  to {
+    top: 0;
+  }
+}
+
+@keyframes easeUp {
+  to {
+    top: -100;
+  }
+}
+
+.pop-up#game-end-window {
+  display: none;
+}
+
+.slide-bar {
+  opacity: 0;
+  margin-top: 0;
+  background: #36393B;
+  height: 3px;
+  width: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  -webkit-transition: opacity 0.5s ease;
+  -moz-transition: opacity 0.5s ease;
+  -o-transition: opacity 0.5s ease;
+  -ms-transition: opacity 0.5s ease;
+  transition: opacity 0.5s ease;
+}
+
+.player-choice:hover > .slide-bar  {
+  -webkit-opacity: 1;
+  opacity: 1;
+}
+
+
+.credit {
+  position: fixed;
+  text-align: center;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-family: Liberation Sans, sans-serif;
+  font-size: 10px;
+  -webkit-opacity: 0.8;
+  opacity: 0.8;
+}

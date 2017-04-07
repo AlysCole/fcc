@@ -1,0 +1,24 @@
+body {
+  font-family: 'Input Mono', monospace;
+  text-align: center;
+  background: black;
+  color: #4AD942; }
+
+span {
+  text-align: center;
+  letter-spacing: 8px;
+  padding: 8px auto; }
+
+.roomCell {
+  color: #282A2E; }
+
+.hiddenRoomCell {
+  background: #373B41; }
+
+.wallCell {
+  color: #195219; }
+
+.monster1Cell, .monster2Cell, .monster3Cell, .bossMonsterCell {
+  color: #C40F0F; }
+
+/*# sourceMappingURL=styles.css.map */

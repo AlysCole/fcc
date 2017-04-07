@@ -1,0 +1,34 @@
+body {
+  height: 100%; }
+
+#footer {
+  text-align: center;
+  margin: 30px auto;
+  display: table; }
+
+a {
+  color: grey; }
+
+a:active {
+  color: aqua; }
+
+.markdownPreviewer {
+  display: table;
+  width: 100%;
+  height: 100%;
+  border-spacing: 20px; }
+  .markdownPreviewer .markdownEditor {
+    display: table-cell;
+    height: 400px;
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    resize: none; }
+  .markdownPreviewer .markdownPreview {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    font-family: Roboto; }
+
+/*# sourceMappingURL=styles.css.map */

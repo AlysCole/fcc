@@ -1,0 +1,87 @@
+body {
+  margin: 30px;
+  margin-top: 80px;
+  text-align: center;
+  background: #E7DFCF;
+  font-family: 'Oswald', sans-serif; }
+
+table, th, td {
+  border-spacing: 1px;
+  text-align: center; }
+
+table {
+  margin: 5px auto; }
+
+td {
+  border-radius: 5px;
+  border-collapse: collapse;
+  height: 10px;
+  width: 10px; }
+
+.aliveCell {
+  background: #106d74; }
+
+.oldAliveCell {
+  background: #0A2735; }
+
+.deadCell {
+  background: #91B9B1; }
+
+.header-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: auto;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  width: 100%;
+  background: #BCA479;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #e7dfcf 0%, #b7ab98 99%);
+  /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, #e7dfcf 0%, #b7ab98 99%);
+  /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, #e7dfcf 0%, #b7ab98 99%);
+  /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e7dfcf', endColorstr='#b7ab98',GradientType=0 );
+  /* IE6-9 */
+  -webkit-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.9);
+  -moz-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.9);
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.9);
+  color: white;
+  font-size: 20px;
+  -webkit-text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+  -moz-text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3); }
+
+.gameButton {
+  margin: 3px;
+  padding: 6px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #91b9b1;
+  /* Old browsers */
+  color: white;
+  -webkit-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.3);
+  font-family: sans-serif; }
+
+.gameButton:hover {
+  background: #B3CEC9; }
+
+.gameButton:active {
+  background: #69A095; }
+
+#footer {
+  margin: 20px;
+  font-family: sans-serif;
+  font-size: 12px; }
+
+a {
+  color: #91b9b1; }
+
+a:visited {
+  color: #91b9b1; }
+
+/*# sourceMappingURL=styles.css.map */

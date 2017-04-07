@@ -1,0 +1,126 @@
+/* line 3, ../sass/styles.scss */
+html {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* line 7, ../sass/styles.scss */
+#recipe-box {
+  padding: 30px;
+  margin: 0 auto;
+  width: 70%;
+  text-align: right;
+  background: #e6e6e6;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.1);
+  border-width: 1px;
+  border-radius: 3px;
+}
+
+/* line 21, ../sass/styles.scss */
+.userRecipe {
+  text-align: center;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* line 27, ../sass/styles.scss */
+.recipeName {
+  width: 100%;
+  padding: 10px;
+  color: white;
+  background: #84767E;
+  font-family: 'Roboto', sans-serif;
+  font-size: 18px;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-width: 1px;
+}
+
+/* line 43, ../sass/styles.scss */
+.userRecipeDetails {
+  display: none;
+  padding: 10px;
+  text-align: center;
+  background: #C0B1B2;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-width: 1px;
+}
+
+/* line 55, ../sass/styles.scss */
+.ingredientsHeader {
+  color: white;
+  text-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
+  border-width: 0;
+  border-style: solid;
+  border-color: #84767E;
+  border-bottom-width: 1px;
+}
+
+/* line 66, ../sass/styles.scss */
+.ingredient {
+  display: block;
+  padding: 10px;
+  margin: 5px;
+  color: white;
+  background: #84767E;
+  -moz-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-width: 1px;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* line 81, ../sass/styles.scss */
+input, textarea, label {
+  text-align: left;
+  display: block;
+}
+
+/* line 86, ../sass/styles.scss */
+textarea {
+  width: 80%;
+}
+
+/* line 90, ../sass/styles.scss */
+.recipeForm {
+  display: none;
+  margin-top: 15px;
+  padding: 30px;
+  width: 100%;
+  background: #C0B1B2;
+  border-width: 0px;
+  border-top-width: 1px;
+  border-bottom-width: 1px;
+  border-color: #84767E;
+  border-style: solid;
+}
+
+/* line 105, ../sass/styles.scss */
+.addRecipe {
+  width: 100%;
+  margin-left: -30px;
+}
+
+/* line 110, ../sass/styles.scss */
+.submit-button {
+  padding: 10px;
+  margin-top: 20px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 18px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  -moz-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  background: #BEC9BA;
+  color: white;
+}

@@ -1,0 +1,37 @@
+<html>
+  <head>
+      <title>Tic Tac Toe!</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+		  <!-- External libraries/fonts below this line -->		 
+		  <link href='https://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
+		  <link href='https://fonts.googleapis.com/css?family=Slabo+27px' rel='stylesheet' type='text/css'>
+		  <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+
+      <link rel="stylesheet" href="styles.css">
+      <script src="ticTacToe.js"> </script>
+  </head>
+  <body>
+      <div class="game-table">
+          <div id="game-row-1" class="game-row"></div>
+          <div id="game-row-2" class="game-row"></div>
+          <div id="game-row-3" class="game-row"></div>
+      </div>
+      <div class="pop-up">
+          <div class="pop-up-window no-select">
+              <span>Take your pick.</span>
+              <ul class="player-choices">
+                  <li class="player-choice" value="X"><span class="player-choice-text">X</span><div class="slide-bar"></div></li>
+                  <li class="player-choice" value="O"><span class="player-choice-text">O</span><div class="slide-bar"></div></li>
+                  <div><span class="player-choice-text">O </span> goes first.</div>
+              </ul>
+          </div>
+      </div>
+      <div class="pop-up" id="game-end-window">
+          <div class="pop-up-window no-select">
+              <span id="game-end-result">You lose!</span>
+          </div></div>
+          <div class="credit no-select">
+              A Tic Tac Toe Game by <a href="https://github.com/azuriolinist">azuriolinist</a>
+          </div>
+  </body>
+</html>

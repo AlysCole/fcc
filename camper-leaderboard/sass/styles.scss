@@ -1,0 +1,149 @@
+@import 'compass';
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  height: 100%;
+  font-family: sans-serif;
+}
+
+a {
+  color: #6C7BA2;
+}
+
+a:visited {
+  color: #7C89AC;
+}
+
+
+#background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  z-index: -1;
+  background: {
+    image: linear-gradient(
+      rgba(0,0,0,.4),
+      rgba(0,0,0,.4)
+    ), url(https://images.unsplash.com/photo-1462819067004-905a72ea3996?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&s=4832f28a526c7a3538a887b8fbbfe897);
+    repeat: no-repeat;
+    position: center center;
+    size: cover;
+  }
+}
+
+#leaderboard {
+  margin-bottom: 20px;
+}
+
+#header { 
+  width: 100%;
+  background-color: rgba(151,163,194,1);
+  @include filter-gradient(#97a3c2, #516585, vertical);
+  @include background-image(linear-gradient(top, rgba(151,163,194,1) 0%, rgba(81,101,133,1) 100%));
+  @include box-shadow((0px 1px 2px 0px rgba(0,0,0,.5)));
+  text-align: center;
+}
+
+#footer {
+  color: rgba(255,255,255,0.6);
+  margin: 10px auto;
+  text-align: center;
+}
+
+#footer > a {
+  color: #D8DDEB;
+}
+
+#logo { 
+  width: 250px;
+}
+
+#leaderboard-text {
+  text-align: center;
+  font-family: 'Lobster Two', cursive;
+  font-size: 50px;
+  color: white;
+  @include text-shadow((2px 2px 2px 0px rgba(0,0,0,.6)));
+}
+
+#leaderboard-table {
+  border-radius: 25px;
+  display: table;
+  margin: 0 auto;
+}
+
+.leaderboardHeader {
+  display: table-row;
+}
+
+.leaderboardHeaderCell {
+  border-collapse: collapse;
+  border-spacing: 0;
+  display: table-cell;
+  background: #7C89AC;
+  color: white;
+  padding: 5px 20px 5px 20px;
+  border: {
+    color: #6C7BA2;
+    top-width: 0;
+    right-width: 1px;
+    left-width: 1px;
+    bottom-width: 4px;
+    style: solid;
+ }
+}
+
+.leaderboardHeaderToggle:hover {
+  background: #8C9BC4;
+}
+
+.leaderboardHeaderToggle:active {
+  background: #7F90BD;
+}
+
+.leaderboardHeaderToggled {
+  background: #5E6D94;
+}
+
+.leaderboardHeaderCell:first-of-type {
+  border-top-left-radius: 5px; 
+}
+
+.leaderboardHeaderCell:last-of-type {
+  border-top-right-radius: 5px;
+}
+
+.leaderboardUser {
+  display: table-row;
+}
+
+.leaderboardUserCell {
+  display: table-cell;
+  padding: 10px;
+  text-align: center;
+  margin: 0 auto;
+  background: #D8D8D9;
+  border: {
+    style: solid;
+    color: #C6C6C8;
+    top-width: 0;
+    left-width: 0px;
+    right-width: 0px;
+    bottom-width: 3px;
+  }
+}
+
+.userIcon {
+  height: 30px;
+  margin: 0 0;
+  float: left;
+  border-radius: 5px;
+  @include box-shadow((2px 2px 0px 0px #A2A2A5),(-2px 2px 0px 0px #A2A2A5));
+}

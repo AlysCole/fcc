@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Libraries below this line -->
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrender/0.9.75/jsrender.min.js"></script>
+
+    <script src="twitch.js"></script>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <!-- Streamer template -->
+    <script type="text/x-jsrender" id="streamer-template">
+      <div class="streamer-tmpl">
+        <img class="streamer-tmpl-logo" src="{{:logo}}" /><a href="{{:url}}"><span class="streamer-tmpl-usr">{{:displayName}}</span></a>
+        <br/><span class="streamer-tmpl-info">{{:game}}</span>
+      </div>
+    </script>
+
+    <!-- Template for a non-existant user -->
+    <script type="text/x-jsrender" id="false-streamer-template">
+      <div class="streamer-tmpl">
+        <img class="streamer-tmpl-logo" src="{{:logo}}" /><span class="streamer-tmpl-usr">{{:displayName}}</span>
+        <br/><span class="streamer-tmpl-info">{{:game}}</span>
+      </div>
+    </script>
+
+    <h1 class="page-header">Twitch.tv Streamers</h1>
+    <div id="streamer-menu">
+      <span class="streamer-menu-link" id="streamer-link-all">All</span>
+      <span class="streamer-menu-link" id="streamer-link-online">Online</span>
+      <span class="streamer-menu-link" id="streamer-link-offline">Offline</span>
+    </div>
+
+    <div id="streamer-container">
+      <!-- Streamer elements go in this container -->
+    </div>
+  </body>
+</html>
+

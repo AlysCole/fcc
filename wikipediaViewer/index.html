@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Wikipedia Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Attach script/stylesheet(s) below -->
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrender/0.9.75/jsrender.min.js"></script>
+    <script src="wikipediaViewer.js"></script>
+    <!-- Fonts -->
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300' rel='stylesheet' type='text/css'>
+    
+    <!-- Search result template, which should be inserted into result-container -->
+    <script id="result-template" type="text/x-jsrender">
+      <div class="result-body" style="display:none">
+        <h3 class="result-title"><a href="{{:link}}">{{:name}}</a></h3>
+        <div class="result-desc">{{:desc}}</div>
+      </div>
+    </script>
+  </head>
+  <body>
+    <form id="search-form">
+      <input type="text" placeholder="Search here" class="flat-input" id="search-input" value=""></input>
+      <br/>
+      <input type="button" value="RANDOM" class="flat-button" id="wikipedia-random" onclick="window.location='http://en.wikipedia.org/wiki/Special:Random'"></input>
+      <input type="submit" value="SEARCH" id="search-submit" class="flat-button"></input>
+    </form>
+    <div id="result-container">
+      <!-- Results should go here -->
+    </div>
+
+  </body>
+</html>
+

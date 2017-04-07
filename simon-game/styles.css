@@ -1,0 +1,176 @@
+body {
+  text-align: center;
+  background: #EADAD1;
+}
+
+div {
+  position: relative;
+}
+
+a {
+  font-style: italic;
+  color: #B56138;
+}
+
+a:hover {
+  color: #FFFFFF;
+}
+
+a:active {
+  color: #B72E2E;
+}
+
+svg#game-circle {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: default;
+  position: absolute;
+  display: table-cell;
+  margin: 10px auto;
+  vertical-align: center;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+circle {
+  fill: #DBDBDB;
+}
+circle#simon-control-circle {
+  fill: #B6B6B6;
+}
+
+
+#top-right-portion {
+  fill: #E9B195;
+}
+#top-left-portion {
+  fill: #B56138;
+}
+#bottom-left-portion {
+  fill: #DD885F;
+}
+#bottom-right-portion {
+  fill: #D6703D;
+}
+
+#top-right-portion:active {
+  fill: #B72E2E;
+  opacity: 1;
+}
+#bottom-right-portion:active {
+  fill: #B72E2E;
+  opacity: 1;
+}
+#bottom-left-portion:active {
+  fill: #B72E2E;
+  opacity: 1;
+}
+#top-left-portion:active {
+  fill: #B72E2E;
+  opacity: 1;
+}
+
+.circle-quarter-activated:hover {
+  opacity: 0.5;
+}
+
+.shadow {
+  fill: rgba(0,0,0,.1);
+}
+
+.simon-text {
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  fill: #EADAD1;
+}
+
+#start-button-box {
+  fill: #4FC060;
+}
+#start-button-activated {
+  fill: #3DAB4F;
+}
+#start-button:hover #start-button-box {
+  fill: #8ED79A;
+}
+#start-button:active #start-button-box {
+  fill: #3DAB4F;
+}
+
+#strict-button-box {
+  fill: #D96666;
+}
+#strict-button-activated {
+  fill: #B72E2E;
+}
+#strict-button:hover #strict-button-box {
+  fill: #DD7676;
+}
+#strict-button:active #strict-button-box {
+  fill: #B72E2E;
+}
+
+#about-button-box {
+  fill: #C77D54;
+}
+
+#about-button:hover > #about-button-box {
+  fill: #D59C7C;
+}
+
+#about-button:active > #about-button-box {
+  fill: #B56138;
+}
+
+#counter-box {
+  fill: #DBDBDB;
+}
+
+#count-text {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 50px;
+  font-color: 
+}
+
+.pop-up-shadow {
+  display: none;
+  position: fixed;
+  height: 100%;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(0,0,0,0.4);
+}
+
+.pop-up {
+  height: 20px;
+  margin: auto;
+  padding: 20px 20px 20px 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100px;
+  background: #B6B6B6;
+  color: #DBDBDB;
+  outline: solid 10px rgba(0,0,0,.4);
+  font-family: 'Roboto Mono', sans-serif;
+  font-size: 20px;
+}
+
+#about-window {
+  min-width: 200px;
+  min-height: 50px;
+  max-height: 100px;
+  width: 30%;
+  height: 40%;
+  text-overflow: "-";
+  overflow: auto;
+}

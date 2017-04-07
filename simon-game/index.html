@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title>A Game of Simon</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="styles.css" rel="stylesheet" />
+      <link href='https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto' rel='stylesheet' type='text/css'>
+      <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+      <script src="game.js"></script>
+      <script type="text/javascript" src="http://livejs.com/live.js"></script>
+  </head>
+  
+  <body>
+      <svg id="game-circle" width="500" height="500" viewBox="0 0 420 420">
+          <circle class="shadow" cx="205" cy="205" r="205"></circle>
+          <circle cx="205" cy="205" r="200"></circle>
+          <path id="top-right-portion" class="circle-quarter" mp3="https://s3.amazonaws.com/freecodecamp/simonSound1.mp3" d="M215, 195 L215,20 A200,200 1 0,1 390,195 z"></path>
+          <path id="bottom-right-portion" class="circle-quarter" mp3="https://s3.amazonaws.com/freecodecamp/simonSound2.mp3" d="M215,215 L215,390 A200,200 1 0,0 390,215 z"></path>
+          <path id="bottom-left-portion" class="circle-quarter" mp3="https://s3.amazonaws.com/freecodecamp/simonSound3.mp3" d="M195,215 L195,390 A200,200 1 0,1 20,215 z"></path>
+          <path id="top-left-portion" class="circle-quarter" mp3="https://s3.amazonaws.com/freecodecamp/simonSound4.mp3" d="M195,195 L195,20 A200,200 1 0,0 20,195"></path>
+          <circle class="shadow" cx="205" cy="205" r="115"></circle>
+          <circle id="simon-control-border" class="simon-controls" cx="205" cy="205" r="110"></circle>
+          <circle id="simon-control-circle" class="simon-controls" cx="205" cy="205" r="100"></circle>
+          <rect id="counter-box" x="150" y="170" width="118" height="50" rx="4" ry="4"></rect>
+          <text id="count-text"  x="177" y="213">--</text>
+          <g id="start-button">
+              <rect id="start-button-box" x="155" y="230" width="45" height="20" rx="3" ry="2"></rect>
+              <text class="simon-text" id="start-button-text" x="158" y="245">START</text>
+          </g>
+          <g id="strict-button">
+              <rect id="strict-button-box" x="210" y="230" width="50" height="20" rx="3" ry="2"></rect>
+              <text class="simon-text" id="strict-button-text" x="213" y="245">STRICT</text>
+          </g>
+          <g id="about-button">
+              <rect id="about-button-box" x="180" y="258" width="50" height="20" rx="3" ry="2"></rect>
+              <text class="simon-text" id="about-button-text" x="185" y="273">ABOUT</text>
+          </g>
+      </svg>
+      <div class="pop-up-shadow" id="end-window-shadow">
+          <div class="pop-up" id="end-window">YOU WIN!</div>
+      </div>
+      <div class="pop-up-shadow" id="about-window-shadow">
+          <div class="pop-up" id="about-window">
+              Based on the electronic game <a href="https://en.wikipedia.org/wiki/Simon_%28game%29">Simon</a>, this was written for the <a href="https://www.freecodecamp.com/challenges/build-a-simon-game">Build a Simon Game</a> project on FreeCodeCamp by <a href="https://github.com/AlysCole">AlysCole</a>.
+          </div>
+      </div>
+  </body>
+</html>

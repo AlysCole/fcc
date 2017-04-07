@@ -1,0 +1,106 @@
+body {
+  background: #3B4756;
+  text-align: center;
+  color:#3B4756; 
+}
+
+h1 {
+  color: #FFC98C;
+  text-shadow: 2px 2px 0px #A62B47,
+  -1px -1px 0px #fff;
+  text-align: center;
+  margin: 5px;
+}
+
+a {
+  color: #3B4756;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+}
+
+a:visited {
+  color: #A62B47;
+}
+
+
+#streamer-container {
+  position: relative;
+  text-align: center;
+  width: 50%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.streamer-tmpl {
+  display: none;
+  position: relative;
+  background: #FFDA89;
+  box-shadow: 0px 2px 0px #A62B47,
+  0px -1px 0px #fff;
+  margin: 5px;
+  padding: 10px;
+  overflow: auto;
+}
+
+.streamer-tmpl:hover {
+  animation-duration: 0.8s;
+  animation-name: slide-in;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+#streamer-menu {
+  margin: 10px 0 10px 0;
+}
+
+.streamer-menu-link {
+  background: #FFDA89;
+  box-shadow: 0px 2px 0px #A62B47,
+  0px -1px 0px #fff;
+  border-radius: 5px;
+  width: 50%;
+  padding: 2px;
+  margin: 0 5% 0 5%;
+}
+
+.streamer-menu-link:hover {
+  animation-duration: 0.8s;
+  animation-name: fade-background;
+}
+
+@keyframes fade-background {
+  to {
+    background: #fff;
+  }
+}
+
+.streamer-tmpl-logo {
+  float: left;
+  text-align: center;
+  position: relative;
+  height: 50px;
+  margin: 0 auto;
+}
+
+.streamer-tmpl-usr {
+  margin: 5px;
+  position: relative;
+  vertical-align: center;
+  left: 5%;
+  padding-left: auto;
+  padding-right: auto; 
+}
+
+.streamer-tmpl-info {
+  margin: 5px;
+  position: relative;
+  left: 5%;
+  right: 3%;
+  overflow: auto;
+}
