@@ -1,6 +1,10 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import '../sass/styles.scss';
+
 Math.randomBetween = (a, b) => {
   return Math.floor((Math.random() * (b - a + 1)) + a);
-}
+};
 
 // Declare a Dungeon namespace
 var Grid = {}; 
@@ -100,7 +104,7 @@ Grid.getRandomMatchingCellWithin = (x1, x2, y1, y2, type, grid) => {
   }
 
   return cell;
-}
+};
 
 Grid.randomDirection = () => {
   return (Math.randomBetween(0,1) ? "x" : "y");
@@ -118,7 +122,7 @@ Grid.determinePath = (startX, startY, targetX, targetY, grid) => {
     list.forEach((cell) => {
       
     });
-  }
+  };
 
   let start = {
     x: startX,
@@ -163,152 +167,6 @@ Grid.determinePath = (startX, startY, targetX, targetY, grid) => {
 
 
 class Dungeon extends React.Component {
-  state = {
-    dungeon: [],
-    level: 3,
-    minRoomHeight: 5,
-    minRoomWidth: 6,
-    maxRoomHeight: 9,
-    maxRoomWidth: 11,
-    minNumOfRooms: 5,
-    maxNumOfRooms: 7,
-    minHiddenRoomHeight: 1,
-    minHiddenRoomWidth: 1,
-    maxHiddenRoomHeight: 1,
-    maxHiddenRoomWidth: 1,
-    minNumOfHiddenRooms: 6,
-    maxNumOfHiddenRooms: 10,
-    currNumOfRooms: 0,
-    minSplitSize: null,
-    roomSpacing: 1,
-    gridWidth: 30,
-    gridHeight: 20,
-    randomCorridors: 0, // (0-100) Higher input means more chance of generating non-straight corridors
-    centerX: 0,
-    centerY: 0
-	}
-
-  legend = {
-    "room": 0,
-    "hiddenRoom": 1,
-    "corridor": 2,
-    "wall": 3,
-    "player": 4,
-    "monster1": 5,
-    "monster2": 6,
-    "monster3": 7,
-    "bossMonster": 8,
-    "empty": 9
-  }
-
-  level = [
-    {
-      level: 1,
-      minNumOfRooms: 1,
-      maxNumOfRooms: 1,
-      minNumOfHiddenRooms: 2,
-      maxNumOfHiddenRooms: 3,
-      typesOfNPCs: [
-        {
-          type: "monster1",
-          min: 1,
-          max: 2
-        }
-      ]
-    },
-    {
-      level: 2,
-      minNumOfRooms: 5,
-      maxNumOfRooms: 7,
-      minNumOfHiddenRooms: 5,
-      maxNumOfHiddenRooms: 8,
-      typesOfNPCs: [
-        {
-          type: "monster1",
-          min: 3,
-          max: 5
-        }
-      ]
-    },
-    {
-      level: 3,
-      minNumOfRooms: 7,
-      maxNumOfRooms: 10,
-      minNumOfHiddenRooms: 5,
-      maxNumOfHiddenRooms: 8,
-      typesOfNPCs: [
-        {
-          type: "monster1",
-          min: 4,
-          max: 6
-        },
-        {
-          type: "monster2",
-          min: 1,
-          max: 2
-        }
-      ]
-    }
-  ]
-
-  NPCs = {
-    monster1: {
-      health: 20,
-      attack: 5
-    },
-    monster2: {
-      health: 40,
-      attack: 8
-    },
-    monster3: {
-      health: 60,
-      attack: 10
-    },
-    bossMonster: {
-      health: 120,
-      attack: 20
-    }
-  }
-
-  NPC = function createNPC(x, y, type, health, attack) {
-    this.type = type,
-    this.x = x,
-    this.y = y,
-    this.health = health,
-    this.attack = attack;
-
-    // Moves NPC randomly and returns dungeon with new NPC position
-    this.update = function updateNPCInDungeon(dungeon) {
-      let ind = dungeon[y][x].NPCs.indexOf(this),
-          adjacents = Grid.getAdjacentCells(this.x, this.y, dungeon),
-          cell = Math.randomBetween(0, adjacents.length - 1),
-          i = 0;
-
-      while ((adjacents[cell].cell.type != "room" ||
-              adjacents[cell].cell.type != "corridor") &&
-             i < adjacents.length) {
-        cell = Math.randomBetween(0, adjacents.length - 1);
-        i++;
-      }
-
-      if (adjacents[cell].cell.type == "room" ||
-          adjacents[cell].cell.type == "corridor") {
-        let currNPC = this;
-        dungeon[this.y][this.x].NPCs.splice(ind, 1);
-
-        this.x = adjacents[cell].x,
-        this.y = adjacents[cell].y;
-
-        dungeon[this.y][this.x].NPCs.unshift(currNPC);
-
-        return dungeon;
-      }
-      
-      return false;
-
-    };
-  }
-
   initializeDungeon = () => {
     if (this.state.dungeon.length == 0) {
       for (let y = 0; y < this.state.gridHeight; y++) {
@@ -561,7 +419,7 @@ class Dungeon extends React.Component {
   }
 
 
-    generateHiddenRooms = (dungeon, max) => {
+  generateHiddenRooms = (dungeon, max) => {
     // recursively places hidden rooms on the edges of the dungeon
     let minHiddenRoomWidth = this.level[this.state.level - 1].minHiddenRoomWidth ||
           this.state.minHiddenRoomWidth,
@@ -621,7 +479,7 @@ class Dungeon extends React.Component {
     return true;
   }
 
-    checkAdjacentCells = (x, y, dungeon, func) => {
+  checkAdjacentCells = (x, y, dungeon, func) => {
     // check adjacent cells based on function parameter.
 
     /* pos should return a positive while neg should return a negative, otherwise the function
@@ -699,7 +557,139 @@ class Dungeon extends React.Component {
   
   constructor(props) {
     super(props);
-    var that = this;
+
+    this.level = [
+      {
+        level: 1,
+        minNumOfRooms: 1,
+        maxNumOfRooms: 1,
+        minNumOfHiddenRooms: 2,
+        maxNumOfHiddenRooms: 3,
+        typesOfNPCs: [
+          {
+            type: "monster1",
+            min: 1,
+            max: 2
+          }
+        ]
+      },
+      {
+        level: 2,
+        minNumOfRooms: 5,
+        maxNumOfRooms: 7,
+        minNumOfHiddenRooms: 5,
+        maxNumOfHiddenRooms: 8,
+        typesOfNPCs: [
+          {
+            type: "monster1",
+            min: 3,
+            max: 5
+          }
+        ]
+      },
+      {
+        level: 3,
+        minNumOfRooms: 7,
+        maxNumOfRooms: 10,
+        minNumOfHiddenRooms: 5,
+        maxNumOfHiddenRooms: 8,
+        typesOfNPCs: [
+          {
+            type: "monster1",
+            min: 4,
+            max: 6
+          },
+          {
+            type: "monster2",
+            min: 1,
+            max: 2
+          }
+        ]
+      }
+    ];
+
+    this.NPCs = {
+      monster1: {
+        health: 20,
+        attack: 5
+      },
+      monster2: {
+        health: 40,
+        attack: 8
+      },
+      monster3: {
+        health: 60,
+        attack: 10
+      },
+      bossMonster: {
+        health: 120,
+        attack: 20
+      }
+    };
+
+    this.NPC = function createNPC(x, y, type, health, attack) {
+      this.type = type,
+      this.x = x,
+      this.y = y,
+      this.health = health,
+      this.attack = attack;
+
+      // Moves NPC randomly and returns dungeon with new NPC position
+      this.update = function updateNPCInDungeon(dungeon) {
+        let ind = dungeon[y][x].NPCs.indexOf(this),
+            adjacents = Grid.getAdjacentCells(this.x, this.y, dungeon),
+            cell = Math.randomBetween(0, adjacents.length - 1),
+            i = 0;
+
+        while ((adjacents[cell].cell.type != "room" ||
+                adjacents[cell].cell.type != "corridor") &&
+               i < adjacents.length) {
+          cell = Math.randomBetween(0, adjacents.length - 1);
+          i++;
+        }
+
+        if (adjacents[cell].cell.type == "room" ||
+            adjacents[cell].cell.type == "corridor") {
+          let currNPC = this;
+          dungeon[this.y][this.x].NPCs.splice(ind, 1);
+
+          this.x = adjacents[cell].x,
+          this.y = adjacents[cell].y;
+
+          dungeon[this.y][this.x].NPCs.unshift(currNPC);
+
+          return dungeon;
+        }
+        
+        return false;
+
+      };
+    };
+
+    this.state = {
+      dungeon: [],
+      level: 3,
+      minRoomHeight: 5,
+      minRoomWidth: 6,
+      maxRoomHeight: 9,
+      maxRoomWidth: 11,
+      minNumOfRooms: 5,
+      maxNumOfRooms: 7,
+      minHiddenRoomHeight: 1,
+      minHiddenRoomWidth: 1,
+      maxHiddenRoomHeight: 1,
+      maxHiddenRoomWidth: 1,
+      minNumOfHiddenRooms: 6,
+      maxNumOfHiddenRooms: 10,
+      currNumOfRooms: 0,
+      minSplitSize: null,
+      roomSpacing: 1,
+      gridWidth: 30,
+      gridHeight: 20,
+      randomCorridors: 0, // (0-100) Higher input means more chance of generating non-straight corridors
+      centerX: 0,
+      centerY: 0
+    };
 
     this.initializeDungeon();
     this.splitDungeon(0, this.state.gridWidth - 1,
@@ -710,83 +700,24 @@ class Dungeon extends React.Component {
       this.level[this.state.level - 1].minNumOfHiddenRooms || this.state.minNumOfHiddenRooms,
       this.level[this.state.level - 1].maxNumOfHiddenRooms || this.state.maxNumOfHiddenRooms
     );
-
-    // populate dungeon with NPCs and hidden rooms
     this.state.dungeon = this.populateDungeonWithNPCs(this.generateHiddenRooms(this.state.dungeon,
                                                                                numOfHiddenRooms));
 
     let center = Grid.getRandomMatchingCellWithin(0, this.state.dungeon[0].length - 1,
                                                   0, this.state.dungeon.length - 1,
                                                   "room", this.state.dungeon);
-
     this.state.centerX = center.x,
     this.state.centerY = center.y;
   }
 
   render() {
-    return <Viewport dungeon={this.state.dungeon} legend={this.legend}
+    return <Viewport dungeon={this.state.dungeon}
     centerX={this.state.centerX} centerY={this.state.centerY}
     NPCs={this.state.NPCs} />;
   }
 }
 
 class Viewport extends React.Component {
-  state = {
-    dungeon: this.props.dungeon,
-    NPCs: this.props.NPCs,
-    dungeonView: [],
-    roomCellFill: '#aaa',
-    wallCellFill: '#eee',
-    emptyCellFill: '#000',
-    playerCellFill: 'red',
-    hiddenRoomCellFill: '#6D6D6D',
-    NPCCellFill: {
-      monster1: '',
-      monster2: '',
-      monster3: '',
-      bossMonster: ''
-    },
-    cellWidth: 20,
-    cellHeight: 20,
-    playerCell: {
-      x: this.props.centerX,
-      y: this.props.centerY
-    },
-    movementLag: 0,
-    movementDelay: 0,
-    viewPortHeight: 0,
-    viewPortWidth: 0,
-    darkViewToggle: true,
-    darkViewRadius: 10,
-    health: 100,
-    level: this.props.level
-  }
-
-  symbols = {
-    room: ".",
-    hiddenRoom: ".",
-    wall: "#",
-    empty: " ",
-    player: "@",
-    monster1: "!",
-    monster2: "!",
-    monster3: "!",
-    bossMonster: "!"
-  }
-
-  classNames = {
-    room: "roomCell",
-    hiddenRoom: "hiddenRoomCell",
-    wall: "wallCell",
-    empty: "emptyCell",
-    player: "playerCell",
-    monster1: "monster1Cell",
-    monster2: "monster2Cell",
-    monster3: "monster3Cell",
-    bossMonster: "bossMonsterCell"   
-  }
-
-
   getRectangularViewFromPoint = (centerX, centerY, radius, dungeon) => {
     let viewCoordinates = {
       x1: (centerX - 1) - Math.floor(this.state.viewPortWidth / 2),
@@ -804,7 +735,7 @@ class Viewport extends React.Component {
         if (x == centerX && y == centerY)
           cellsInRow.push("player");
         else if (!(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2) < Math.pow(radius, 2))
-            && this.state.darkViewToggle) {
+                 && this.state.darkViewToggle) {
           cellsInRow.push("empty");
         }
         else if (dungeon[y] && dungeon[y][x]) {
@@ -861,7 +792,61 @@ class Viewport extends React.Component {
 
   constructor(props) {
     super(props);
-    this.legend = this.props.legend;
+    this.state = {
+      dungeon: this.props.dungeon,
+      NPCs: this.props.NPCs,
+      dungeonView: [],
+      roomCellFill: '#aaa',
+      wallCellFill: '#eee',
+      emptyCellFill: '#000',
+      playerCellFill: 'red',
+      hiddenRoomCellFill: '#6D6D6D',
+      NPCCellFill: {
+        monster1: '',
+        monster2: '',
+        monster3: '',
+        bossMonster: ''
+      },
+      cellWidth: 20,
+      cellHeight: 20,
+      playerCell: {
+        x: this.props.centerX,
+        y: this.props.centerY
+      },
+      movementLag: 0,
+      movementDelay: 0,
+      viewPortHeight: 0,
+      viewPortWidth: 0,
+      darkViewToggle: true,
+      darkViewRadius: 10,
+      health: 100,
+      level: this.props.level
+    };
+
+    this.symbols = {
+      room: ".",
+      hiddenRoom: ".",
+      wall: "#",
+      empty: " ",
+      player: "@",
+      monster1: "!",
+      monster2: "!",
+      monster3: "!",
+      bossMonster: "!"
+    };
+
+    this.classNames = {
+      room: "roomCell",
+      hiddenRoom: "hiddenRoomCell",
+      wall: "wallCell",
+      empty: "emptyCell",
+      player: "playerCell",
+      monster1: "monster1Cell",
+      monster2: "monster2Cell",
+      monster3: "monster3Cell",
+      bossMonster: "bossMonsterCell"   
+    };
+
 
     // Set the viewport size to fit the screen size, and substract a quarter to add spacing.
     this.state.viewPortHeight = (window.innerHeight / this.state.cellHeight);
@@ -888,7 +873,7 @@ class Viewport extends React.Component {
 
   render() {
     return (
-      <div>
+        <div>
         {this.state.dungeonView.map((row, ind) => {
           let viewportCells = row.map((cell, ind) => {
             // Get index key based on value of cell
@@ -906,12 +891,6 @@ class Viewport extends React.Component {
 }
 
 class ViewportCell extends React.Component {
-  state = {
-    type: this.props.type,
-    class: this.props.class,
-    symbol: this.props.symbol
-  }
-
   componentWillReceiveProps = (nextProps) => {
     this.setState({
       type: nextProps.type,
@@ -922,6 +901,11 @@ class ViewportCell extends React.Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      type: this.props.type,
+      class: this.props.class,
+      symbol: this.props.symbol
+    };
   }
 
   render() {
