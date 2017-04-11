@@ -9,7 +9,7 @@ Math.randomBetween = (a, b) => {
 // Declare a Dungeon namespace
 var Grid = {}; 
 
-Grid.getAdjacentCells = (x, y, grid, direction) => {
+Grid.getAdjacentCells = (x, y, grid, noDiagonal) => {
   // returns an array of adjacent cells' coordinates from a two-dimensional array representing a grid.
   var adjacents = [];
 
@@ -17,15 +17,8 @@ Grid.getAdjacentCells = (x, y, grid, direction) => {
     adjacents.push({
       x: x,
       y: y - 1,
-      cell: grid[y - 1][x]
-    });
-  }
-
-  if (grid[y - 1] && grid[y - 1][x + 1] != null) { // north-east
-    adjacents.push({
-      x: x + 1,
-      y: y - 1,
-      cell: grid[y - 1][x + 1]
+      cell: grid[y - 1][x],
+      direction: "n"
     });
   }
 
@@ -33,31 +26,17 @@ Grid.getAdjacentCells = (x, y, grid, direction) => {
     adjacents.push({
       x: x + 1,
       y: y,
-      cell: grid[y][x + 1]
+      cell: grid[y][x + 1],
+      direction: "e"
     });
   }
-
-  if (grid[y + 1] && grid[y + 1][x + 1] != null) { // south-east
-    adjacents.push({
-      x: x + 1,
-      y: y + 1,
-      cell: grid[y + 1][x + 1]
-    });
-  }
-  
+ 
   if (grid[y + 1] && grid[y + 1][x] != null) { // southern cell
     adjacents.push({
       x: x,
       y: y + 1,
-      cell: grid[y + 1][x]
-    });
-  }
-
-  if (grid[y + 1] && grid[y + 1][x - 1] != null) { // south-west cell
-    adjacents.push({
-      x: x - 1,
-      y: y + 1,
-      cell: grid[y + 1][x - 1]
+      cell: grid[y + 1][x],
+      direction: "s"
     });
   }
 
@@ -65,21 +44,51 @@ Grid.getAdjacentCells = (x, y, grid, direction) => {
     adjacents.push({
       x: x - 1,
       y: y,
-      cell: grid[y][x - 1]
+      cell: grid[y][x - 1],
+      direction: "w"
     });
   }
 
-  if (grid[y - 1] && grid[y - 1][x - 1] != null) { // north-west cell
-    adjacents.push({
-      x: x - 1,
-      y: y - 1,
-      cell: grid[y - 1][x - 1]
-    });
+  // if noDiagonal is false, grab diagonal cells
+
+  if (!noDiagonal) {
+    if (grid[y - 1] && grid[y - 1][x - 1] != null) { // north-west cell
+      adjacents.push({
+        x: x - 1,
+        y: y - 1,
+        cell: grid[y - 1][x - 1],
+        direction: "nw"
+      });
+    }
+
+    if (grid[y - 1] && grid[y - 1][x + 1] != null) { // north-east
+      adjacents.push({
+        x: x + 1,
+        y: y - 1,
+        cell: grid[y - 1][x + 1],
+        direction: "ne"
+      });
+    }
+
+    if (grid[y + 1] && grid[y + 1][x + 1] != null) { // south-east
+      adjacents.push({
+        x: x + 1,
+        y: y + 1,
+        cell: grid[y + 1][x + 1],
+        direction: "se"
+      });
+    }
+    
+    if (grid[y + 1] && grid[y + 1][x - 1] != null) {
+      adjacents.push({
+        x: x - 1,
+        y: y + 1,
+        cell: grid[y + 1][x - 1],
+        direction: "sw"
+      });
+    }
   }
 
-  if (direction)
-    return adjacents[direction];
-  
   return adjacents;
 };
 
@@ -110,25 +119,54 @@ Grid.randomDirection = () => {
   return (Math.randomBetween(0,1) ? "x" : "y");
 };
 
+Grid.calculateApproxDistance = (x1, y1, x2, y2) => {
+  return Math.abs((x2 - x1) + (y2 - y1));
+};
+
 Grid.determinePath = (startX, startY, targetX, targetY, grid) => {
   let closed = [],
       open = [];
 
-  let calculateHeuristic = (x1, y1, x2, y2) => {
-    return (Math.abs((x2 - x1) + (y2 - y1)));
+  if (startX == targetX && startY == targetY)
+    return [];
+
+  let getCellFromList = (x, y, list) => {
+    for (let cell of list) {
+      if (cell.x == x && cell.y == y) {
+        return cell;
+      }
+    }
+    return false;
   };
 
-  let getCoordinatesInList = (x, y, list) => {
-    list.forEach((cell) => {
-      
-    });
+  let addCellToList = (cell, list) => {
+    for (let i in list) {
+      // check whether cell already exists in the list
+      if (list[i].x == cell.x && list[i].y == cell.y) {
+        // if so, check whether the existing cell has a higher score.
+        if (list[i].f > cell.f) {
+          // update cell to the lower score if so.
+          list[i].g = cell.g;
+          list[i].h = cell.h;
+          list[i].f = cell.f;
+          list[i].parent = cell.parent;
+          return list;
+        }
+        // and if it the newer cell has a higher score, return the list as it is.
+        return list;
+      }
+    }
+
+    // The cell doesn't exist in the list. Push it in.
+    list.push(cell);
+    return list;
   };
 
   let start = {
     x: startX,
     y: startY,
     g: 0,
-    h: calculateHeuristic(startX, startY, targetX, targetY) * 10
+    h: Grid.calculateApproxDistance(startX, startY, targetX, targetY) * 10
   };
 
   start.f = start.g + start.h;
@@ -138,7 +176,7 @@ Grid.determinePath = (startX, startY, targetX, targetY, grid) => {
   /* SAMPLE OBJECT */
   /* { "x": 0,
    *   "y": 0,
-   *   "g": 0, // distance from start to current position 
+   *   "g": 0, // distance from start to current position based on parent
    *   "h": 0, // approximate distance from current position to target
    *   "f": 0, // g + h = the score
    *   "parent": {"x": -1, "y": -1}
@@ -151,17 +189,81 @@ Grid.determinePath = (startX, startY, targetX, targetY, grid) => {
    * 3. Set the current room to the last element in the closed list.
    * 4. Add the rooms adjacent to the current room to the open list, if they're not in the closed list.
    * 5. If already in the open list and if its score is lesser than the previous one, update its score and change its parent to the current room.
-   * 6. Push the current room and the room with the lowest score from the open list to the closed list. 
+   * 6. Push the room with the lowest score from the open list to the closed list. 
    * 7. If it's a tie, push the most recently added room with the lowest score.
    * NOTE: To get approximate distance, subtract x2 from x1. This is xDist. Subtract y2 from y1, which is yDist. So, (x1 - x2) + (y1 - y2) = Math.abs(h)
    * 8. End the loop once the target square is in the closed list.
    */
 
   let searching = true;
-  while (!searching) {
-    let currRoom = closed[closed.length - 1];
+  while (searching) {
+    let curr = closed[closed.length - 1];
+
+    let adjacent = Grid.getAdjacentCells(curr.x, curr.y, grid);
+
+    adjacent = adjacent.filter((a) => {
+      console.log(a);
+      // Check whether cell is in the closed list
+      if (getCellFromList(a.x, a.y, closed)) {
+        // If so, skip it
+        return false;
+      }
+      // If cell is not a room cell, skip it.
+      else if (a.cell.type != "corridor" ||
+               a.cell.type != "room")
+        return false;
+      return true;
+    });
+
+    // Transform each returned adjacent object into a path object.
+    adjacent = adjacent.map((next) => {
+      let nextInPath = {
+        x: next.x,
+        y: next.y,
+        g: curr.g,
+        h: Grid.calculateApproxDistance(next.x, next.y, targetX, targetY),
+        f: 0,
+        parent: {
+          x: curr.x,
+          y: curr.y
+        }
+      };
+
+      // calculate g score depending on whether cell is diagonal or not from the current cell.
+      if (next.direction == "n" || next.direction == "e" ||
+          next.direction == "s" || next.direction == "w")
+        nextInPath.g += 10;
+      else
+        nextInPath.g += 14;
+
+      nextInPath.f = nextInPath.g + nextInPath.h;
+
+      return nextInPath;
+    });
+
+    // Loop through the adjacent cells and add each one to the open list.
+    for (let i in adjacent) {
+      open = addCellToList(adjacent[i], open);
+    }
+
+    // Reduce the open list into the lowest scored cell and push result.
+    if (open.length > 0) {
+      closed.push(open.reduce((lowest, curr) => {
+        if (curr == null) {
+          return curr;
+        }
+        else if (curr.f <= lowest.f) {
+          if (curr.f == 0)
+            searching = false;
+          return curr;
+        }
+        return lowest;
+      }, null));
+    }
   }
   
+  // Loop back from the target square and return the path
+  return closed;
 };
 
 
@@ -174,7 +276,7 @@ class Dungeon extends React.Component {
         for (let x = 0; x < this.state.gridWidth; x++) {
           arr.push(
             {
-              type: "wall",
+              type: "empty",
               NPCs: []
             }
           );
@@ -184,10 +286,27 @@ class Dungeon extends React.Component {
       }
     }
 
+    // Generate dungeon using BSP trees.
+    this.splitDungeon(1, this.state.gridWidth - 2,
+                      1, this.state.gridHeight - 2,
+                      Grid.randomDirection, this.splitDungeon);
+
+    let numOfHiddenRooms = Math.randomBetween(
+      this.level[this.state.level - 1].minNumOfHiddenRooms || this.state.minNumOfHiddenRooms,
+      this.level[this.state.level - 1].maxNumOfHiddenRooms || this.state.maxNumOfHiddenRooms
+    );
+
+    this.wallRooms();
+
+    this.generateHiddenRooms(numOfHiddenRooms);
+
+    // Generate NPCs 
+    this.populateWithNPCs();
   }
 
   // Function takes a set of coordinates for a rectangle and splits it recursively.
   splitDungeon = (x1, x2, y1, y2, direction, callback) => {
+    // Calculate the size of rectangle.
     let c1 = (direction == "x") ? (x1 - x1) : (y1 - y1),
         c2 = (direction == "x") ? (x2 - x1) : (y2 - y1),
         splitAtCoord = 0,
@@ -198,7 +317,7 @@ class Dungeon extends React.Component {
         minRoomSplitSize = (this.state.minSplitSize) ||
         (((direction == "y") ?
           minRoomHeight :
-          minRoomWidth) + 1),
+          minRoomWidth) + this.state.roomSpacing),
         minNumOfRooms = this.level[this.state.level - 1].minNumOfRooms || this.state.minNumOfRooms,
         maxNumOfRooms = this.level[this.state.level - 1].maxNumOfRooms || this.state.maxNumOfRooms,
         result = 0,
@@ -207,7 +326,7 @@ class Dungeon extends React.Component {
     if ((c2 - minRoomSplitSize) >= minRoomSplitSize &&
         this.state.currNumOfRooms < minNumOfRooms) {
       splitAtCoord = Math.randomBetween(minRoomSplitSize,
-                                               c2 - minRoomSplitSize);
+                                        c2 - minRoomSplitSize);
 
       // Calculate rectangles that result from split.
       let subdungeons = [
@@ -258,12 +377,13 @@ class Dungeon extends React.Component {
     else {
       // We try splitting it another direction if a callback exists.
       if (callback) {
-        result = callback(x1, x2, y1, y2, (direction == "y") ? "x" : "y", null);
+        result = callback(x1, x2, y1, y2, (direction == "y") ? "x" : "y");
         if (!result && this.state.currNumOfRooms < maxNumOfRooms) {
           // generate a room if callback fails to split subdungeon.
-          result =  this.generateRoom(x1, x2, y1, y2);
+          result = this.generateRoom(x1, x2, y1, y2);
         }
       }
+      // Resort to generating a room if no callback exists, and there is room for more... rooms.
       else if (this.state.currNumOfRooms < maxNumOfRooms) {
         result = this.generateRoom(x1, x2, y1, y2);
       }
@@ -278,38 +398,24 @@ class Dungeon extends React.Component {
 
        Returns 0 if fails. Returns 1 if success.
      */
-    let rx1 = x1 - x1,
-        rx2 = x2 - x1,
-        ry1 = y1 - y1,
-        ry2 = y2 - y1,
+    let rx1 = x1 - x1 + this.state.roomSpacing,
+        rx2 = x2 - x1 - this.state.roomSpacing,
+        ry1 = y1 - y1 + this.state.roomSpacing,
+        ry2 = y2 - y1 - this.state.roomSpacing,
         minRoomWidth = this.level[this.state.level - 1].minRoomWidth || this.state.minRoomWidth,
         maxRoomWidth = this.level[this.state.level - 1].maxRoomWidth || this.state.maxRoomWidth,
         minRoomHeight = this.level[this.state.level - 1].minRoomHeight || this.state.minRoomHeight,
         maxRoomHeight = this.level[this.state.level - 1].maxRoomHeight || this.state.maxRoomHeight;
 
+    // Generate a room size between the min and max size of a room to fit within the parameters
+    let roomWidth = Math.randomBetween(minRoomWidth, Math.min(rx2 + 1, maxRoomWidth)),
+        roomHeight = Math.randomBetween(minRoomHeight, Math.min(ry2 + 1, maxRoomHeight));
 
-    let roomX1 = Math.randomBetween(this.state.roomSpacing,
-                                           Math.max((rx2 - (maxRoomWidth - 1 +
-                                                            this.state.roomSpacing) > 0)
-                                                  ? (rx2 - (maxRoomWidth - 1 +
-                                                            this.state.roomSpacing))
-                                                  : (rx2 - (minRoomWidth - 1 +
-                                                            this.state.roomSpacing)),
-                                                    this.state.roomSpacing)) + x1;
-    let roomX2 = Math.randomBetween((roomX1 - x1) + (minRoomWidth - 1),
-                                           Math.min((roomX1 - x1) + (maxRoomWidth - 1),
-                                           rx2)) + x1;
-    let roomY1 = Math.randomBetween(this.state.roomSpacing,
-                                           Math.max((ry2 - (maxRoomHeight - 1 +
-                                                            this.state.roomSpacing) > 0)
-                                                  ? (ry2 - (maxRoomHeight - 1 +
-                                                            this.state.roomSpacing))
-                                                  : (ry2 - (minRoomHeight - 1 +
-                                                            this.state.roomSpacing)), 0))
-               + y1;
-    let roomY2 = Math.randomBetween((roomY1 - y1) + (minRoomHeight - 1),
-                                           Math.min((roomY1 - y1) + (maxRoomHeight - 1),
-                                                    ry2)) + y1;
+    let roomX1 = Math.randomBetween(rx1, rx2 - roomWidth) + x1;
+    let roomX2 = roomX1 + roomWidth - 1;
+    let roomY1 = Math.randomBetween(ry1, ry2 - roomHeight) + y1;
+    let roomY2 = roomY1 + roomHeight - 1;
+
 
     this.state.currNumOfRooms += 1;
     return this.positionRoom(roomX1, roomX2, roomY1, roomY2);
@@ -323,7 +429,7 @@ class Dungeon extends React.Component {
     }
     
     return {
-     "x1": x1,
+      "x1": x1,
       "x2": x2,
       "y1": y1,
       "y2": y2
@@ -376,6 +482,44 @@ class Dungeon extends React.Component {
     return 1;
   }
 
+  wallRooms = () => {
+    /* Loops through all cells in dungeon and replaces empty cells 
+     * adjacent to room cells with wall cells. */
+    let directions = [
+      {x: 0, y: -1}, // north
+      {x: 1, y: -1}, // north-east
+      {x: 1, y: 0}, // east
+      {x: 1, y: 1}, // south-east
+      {x: 0, y: 1}, // south
+      {x: -1, y: 1}, // south-west
+      {x: -1, y: 0}, // west
+      {x: -1, y: -1} // north-west
+    ];
+
+    for (let y in this.state.dungeon) {
+      for (let x in this.state.dungeon[y]) {
+        if (this.state.dungeon[y][x].type == "room" ||
+            this.state.dungeon[y][x].type == "corridor") {
+
+          // Loop through adjacent cells
+          for (let direction of directions) {
+            let currX = parseInt(x) + direction.x,
+                currY = parseInt(y) + direction.y;
+
+            if (!this.state.dungeon[currY] || !this.state.dungeon[currY][currX]) {
+              continue;
+            }
+
+            if (this.state.dungeon[currY][currX].type == "empty") {
+              this.state.dungeon[currY][currX].type = "wall";
+            }
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   checkNPCExistsAtPoint = (x, y, arr) => {
     return (arr.filter(function(npc) {
       return (npc.x == x && npc.y == y);
@@ -388,25 +532,25 @@ class Dungeon extends React.Component {
     });
   }
 
-  populateDungeonWithNPCs = (dungeon) => {
-    // places NPC cells within the dungeon, based on level number
+  populateWithNPCs = () => {
+    // Modifies dungeon in place and generates NPCs, based on level number
     let level = this.level[this.state.level - 1];
 
     level.typesOfNPCs.forEach((npc) => {
       let numOfNPCs = Math.randomBetween(npc.min, npc.max);
       for (let i = 0; i < numOfNPCs; i++) {
-        let coordinates = Grid.getRandomMatchingCellWithin(0, dungeon[0].length - 1,
-                                                           0, dungeon.length - 1,
-                                                           "room", dungeon);
+        let coordinates = Grid.getRandomMatchingCellWithin(0, this.state.dungeon[0].length - 1,
+                                                           0, this.state.dungeon.length - 1,
+                                                           "room", this.state.dungeon);
 
         let newNPC = new this.NPC(coordinates.x, coordinates.y,
                                   npc.type, this.NPCs[npc.type].health,
                                   this.NPCs[npc.type].attack);
-        dungeon[coordinates.y][coordinates.x].NPCs.unshift(newNPC);
+        this.state.dungeon[coordinates.y][coordinates.x].NPCs.unshift(newNPC);
 
         // Run the NPC function every second.
         window.setInterval(() => {
-          let dungeon = newNPC.update(this.state.dungeon);
+          let dungeon = newNPC.update(this.state.dungeon, this.state.centerX, this.state.centerY);
           if (dungeon)
             this.setState({
               dungeon: dungeon
@@ -414,12 +558,10 @@ class Dungeon extends React.Component {
         }, 1000);
       }
     });
-
-    return dungeon;
   }
 
 
-  generateHiddenRooms = (dungeon, max) => {
+  generateHiddenRooms = (max) => {
     // recursively places hidden rooms on the edges of the dungeon
     let minHiddenRoomWidth = this.level[this.state.level - 1].minHiddenRoomWidth ||
           this.state.minHiddenRoomWidth,
@@ -438,53 +580,45 @@ class Dungeon extends React.Component {
     let x, y, adjacent;
 
     while (!adjacent) {
-      x = Math.randomBetween(0, dungeon[0].length - 1);
-      y = Math.randomBetween(0, dungeon.length - 1);
-      if (this.checkRectOfCells(dungeon, x, y, width, height, function(cell) {
-        if (cell.type == "wall")
-          return true;
-        return false;
-      }.bind("this"))) {
-        adjacent = this.checkAdjacentCells(x, y, dungeon, function(cell) {
-          if (cell.type == "room")
-            return true;
-          return false;
-        }.bind(this));
+      x = Math.randomBetween(0, this.state.dungeon[0].length - 1);
+      y = Math.randomBetween(0, this.state.dungeon.length - 1);
+      if (this.checkRectOfCells(x, y, width, height, function(cell) {
+        return (cell.type == "wall");
+      })) {
+        adjacent = this.checkAdjacentCells(x, y, function(cell) {
+          return (cell.type == "room");
+        });
       }
     }
 
     for (let modY = 0; modY < height; modY++) {
       for (let modX = 0; modX < width; modX++) {
-        if (dungeon[y  + modY])
-          dungeon[y + modY][x + modX].type = "hiddenRoom";
+        if (this.state.dungeon[y  + modY])
+          this.state.dungeon[y + modY][x + modX].type = "hiddenRoom";
       }
     }
 
     if (max > 1) {
-      return (this.generateHiddenRooms(dungeon, max - 1));
+      this.generateHiddenRooms(max - 1);
     }
-
-    return dungeon;
   }
 
-  checkRectOfCells = (dungeon, x, y, width, height, func) => {
+  
+
+  checkRectOfCells = (x, y, width, height, func) => {
     // checks all cells within a set of coordinates 
     for (let modY = 0; modY < height; modY++) {
       for (let modX = 0; modX < width; modX++) {
-        if (!dungeon[y + modY] || !dungeon[y + modY][x + modX] // check if cells don't exist
-            || !func(dungeon[y + modY][x + modX]))
+        if (!this.state.dungeon[y + modY] || !this.state.dungeon[y + modY][x + modX] // check if cells don't exist
+            || !func(this.state.dungeon[y + modY][x + modX]))
           return false;
       }
     }
     return true;
   }
 
-  checkAdjacentCells = (x, y, dungeon, func) => {
+  checkAdjacentCells = (x, y, func) => {
     // check adjacent cells based on function parameter.
-
-    /* pos should return a positive while neg should return a negative, otherwise the function
-     * returns a false.
-     */
 
     let directions = [
       {x: 0, y: -1}, // north
@@ -493,17 +627,16 @@ class Dungeon extends React.Component {
       {x: -1, y: 0}, // west
     ];
 
-    for (let i = 0; i < directions.length; i++) {
+    for (let i in directions) {
       let currX = x + directions[i].x,
           currY = y + directions[i].y;
 
-      if (!dungeon[currY] || !dungeon[currY][currX])
+      if (!this.state.dungeon[currY] || !this.state.dungeon[currY][currX])
         continue;
 
-      if (func(dungeon[currY][currX]))
+      if (func(this.state.dungeon[currY][currX], currX, currY))
         return true;
     }
-
     return false;
   }
 
@@ -631,16 +764,55 @@ class Dungeon extends React.Component {
       this.type = type,
       this.x = x,
       this.y = y,
+      this.direction = {
+        x: Math.randomBetween(-1, 1),
+        y: Math.randomBetween(-1, 1)
+      },
       this.health = health,
-      this.attack = attack;
+      this.attack = attack,
+      this.targetX = -1,
+      this.targetY = -1,
+      this.path = [];
 
-      // Moves NPC randomly and returns dungeon with new NPC position
-      this.update = function updateNPCInDungeon(dungeon) {
+      // Updates NPC position
+      this.update = function updateNPCInDungeon(dungeon, targetX, targetY) {
         let ind = dungeon[y][x].NPCs.indexOf(this),
             adjacents = Grid.getAdjacentCells(this.x, this.y, dungeon),
             cell = Math.randomBetween(0, adjacents.length - 1),
             i = 0;
 
+        let distance = Grid.calculateApproxDistance(this.x, targetX,
+                                                    this.y, targetY);
+        // Move NPC towards the PC if within view 
+        if (distance < 5 && (this.x != targetX && this.y != targetY)) {
+          console.log(this.x, targetX, this.y, targetY);
+          if (this.targetX != targetX || this.targetY != targetY) {
+            this.path = Grid.determinePath(this.x, this.y,
+                                           targetX, targetY, dungeon);
+            this.targetX = targetX;
+            this.targetY = targetY;
+          }
+
+          console.log("Checking path...", this.path);
+
+          if (this.path.length > 1) {
+            // Take current coordinates off of path
+            this.path.splice(0, 1);
+            
+            // Move NPC into next step in path
+            let currNPC = this;
+
+            dungeon[this.y][this.x].NPCs.splice(ind, 1);
+
+            this.x = this.path[0].x; 
+            this.y = this.path[0].y;
+
+            dungeon[this.y][this.x].NPCs.unshift(currNPC);
+            return dungeon;
+          }
+        }
+
+        // otherwise, NPC roams around
         while ((adjacents[cell].cell.type != "room" ||
                 adjacents[cell].cell.type != "corridor") &&
                i < adjacents.length) {
@@ -662,7 +834,6 @@ class Dungeon extends React.Component {
         }
         
         return false;
-
       };
     };
 
@@ -670,9 +841,9 @@ class Dungeon extends React.Component {
       dungeon: [],
       level: 3,
       minRoomHeight: 5,
-      minRoomWidth: 6,
-      maxRoomHeight: 9,
-      maxRoomWidth: 11,
+      minRoomWidth: 7,
+      maxRoomHeight: 6,
+      maxRoomWidth: 8,
       minNumOfRooms: 5,
       maxNumOfRooms: 7,
       minHiddenRoomHeight: 1,
@@ -684,24 +855,14 @@ class Dungeon extends React.Component {
       currNumOfRooms: 0,
       minSplitSize: null,
       roomSpacing: 1,
-      gridWidth: 30,
-      gridHeight: 20,
+      gridWidth: 40,
+      gridHeight: 30,
       randomCorridors: 0, // (0-100) Higher input means more chance of generating non-straight corridors
       centerX: 0,
       centerY: 0
     };
 
     this.initializeDungeon();
-    this.splitDungeon(0, this.state.gridWidth - 1,
-                      0, this.state.gridHeight - 1,
-                      Grid.randomDirection(), this.splitDungeon, 1);
-
-    let numOfHiddenRooms = Math.randomBetween(
-      this.level[this.state.level - 1].minNumOfHiddenRooms || this.state.minNumOfHiddenRooms,
-      this.level[this.state.level - 1].maxNumOfHiddenRooms || this.state.maxNumOfHiddenRooms
-    );
-    this.state.dungeon = this.populateDungeonWithNPCs(this.generateHiddenRooms(this.state.dungeon,
-                                                                               numOfHiddenRooms));
 
     let center = Grid.getRandomMatchingCellWithin(0, this.state.dungeon[0].length - 1,
                                                   0, this.state.dungeon.length - 1,
@@ -744,8 +905,11 @@ class Viewport extends React.Component {
           }
           else if (dungeon[y][x].type == "hiddenRoom") { // check if the cell is a hidden room
             // calculate the distance between player cell and hidden room
+            /*
             let distance = Math.sqrt(Math.pow(x - centerX, 2) +
                                      Math.pow(y - centerY, 2));
+             */
+            let distance = Grid.calculateApproxDistance(x, centerX, y, centerY);
             if (distance < 2) // decide whether the hidden room is visible
               cellsInRow.push("hiddenRoom");
             else
@@ -758,7 +922,7 @@ class Viewport extends React.Component {
           }
         }
         else
-          cellsInRow.push("wall");
+          cellsInRow.push("empty");
       }
       view.push(cellsInRow);
     }
@@ -815,8 +979,8 @@ class Viewport extends React.Component {
       },
       movementLag: 0,
       movementDelay: 0,
-      viewPortHeight: 0,
-      viewPortWidth: 0,
+      viewPortHeight: 15,
+      viewPortWidth: 15,
       darkViewToggle: true,
       darkViewRadius: 10,
       health: 100,
@@ -827,7 +991,7 @@ class Viewport extends React.Component {
       room: ".",
       hiddenRoom: ".",
       wall: "#",
-      empty: " ",
+      empty: ".",
       player: "@",
       monster1: "!",
       monster2: "!",
@@ -848,12 +1012,14 @@ class Viewport extends React.Component {
     };
 
 
-    // Set the viewport size to fit the screen size, and substract a quarter to add spacing.
+    /*
+    // Set the viewport size to fit the screen size, and substract a portion to add spacing.
     this.state.viewPortHeight = (window.innerHeight / this.state.cellHeight);
-    this.state.viewPortHeight = this.state.viewPortHeight - (this.state.viewPortHeight / 4);
+    this.state.viewPortHeight = this.state.viewPortHeight - (this.state.viewPortHeight / 10);
 
     this.state.viewPortWidth = (window.innerWidth / this.state.cellWidth);
-    this.state.viewPortWidth = this.state.viewPortWidth - (this.state.viewPortWidth / 4);
+    this.state.viewPortWidth = this.state.viewPortWidth - (this.state.viewPortWidth / 10);
+     */
 
 
     // Make sure radius is within the viewport size.

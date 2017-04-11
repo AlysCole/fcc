@@ -11,6 +11,10 @@ span {
   padding: 8px auto;
 }
 
+#game {
+  overflow: hidden;
+}
+
 .roomCell {
   color: #282A2E;
 }
@@ -20,7 +24,11 @@ span {
 }
 
 .wallCell {
-  color: #195219;
+  color: #2C912D;
+}
+
+.emptyCell {
+  color: rgba(0,0,0,0);
 }
 
 .monster1Cell, .monster2Cell, .monster3Cell, .bossMonsterCell {
