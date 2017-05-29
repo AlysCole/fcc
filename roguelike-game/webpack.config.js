@@ -4,26 +4,30 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
   entry: {
-    app: [
-      './src/main.jsx'
-    ]
+    Grid: './src/Grid.js',
+    main: './src/main.jsx'
   },
   output: {
     publicPath: '/dist/',
     path: path.join(__dirname, 'dist/'),
-    filename: 'main.js'
+    filename: '[name].js'
   },
   devtool: 'source-map',
   plugins: [
     new ExtractTextPlugin('./styles.css')
   ],
   module: {
-    rules: [
+    loaders: [
       {
         test: /\.jsx$/,
         exclude: [/node_modules/, /styles/],
         include: path.join(__dirname, 'src'),
-        loaders: [ 'babel-loader' ]
+        loader: 'babel-loader'
+      },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: [/node-modules/]
       },
       {
         test: /\.scss$/,

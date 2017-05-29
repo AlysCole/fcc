@@ -1,49 +1,38 @@
 {
   "name": "roguelike-game",
   "version": "1.0.0",
+  "description": "",
   "scripts": {
     "build": "webpack -p",
     "start": "webpack-dev-server --hot --progress --colors --inline"
   },
-  "devDependencies": {
-    "babel-cli": "^6.24.0",
-    "babel-core": "^6.24.0",
-    "babel-loader": "^6.4.1",
-    "babel-plugin-transform-react-jsx": "^6.23.0",
-    "babel-preset-env": "^1.3.2",
-    "babel-preset-stage-0": "^6.22.0",
-    "babel-preset-stage-1": "^6.22.0",
-    "css-loader": "^0.28.0",
-    "node-sass": "^4.5.2",
-    "react-hot-loader": "^1.3.1",
-    "sass-loader": "^6.0.3",
-    "style-loader": "^0.16.1",
-    "webpack": "^2.3.3"
-  },
-  "main": "main.js",
-  "dependencies": {
-    "babel-cli": "^6.24.0",
-    "babel-core": "^6.24.0",
-    "babel-plugin-transform-react-jsx": "^6.23.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-polyfill": "^6.23.0",
-    "babel-preset-es2015": "^6.24.0",
-    "babel-preset-react": "^6.23.0",
-    "babel-runtime": "^6.23.0",
-    "extract-text-webpack-plugin": "^2.1.0",
-    "react": "^15.4.2",
-    "react-dom": "^15.4.2",
-    "react-hot-loader": "^1.3.1",
-    "webpack": "^2.3.3"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlysCole/fcc-roguelike-game.git"
+    "url": "https://github.com/AlysCole/freecodecamp/tree/master/roguelike-game"
   },
+  "keywords": [
+    "roguelike",
+    "dungeon",
+    "game"
+  ],
   "author": "Alyssa Alvarez",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/AlysCole/fcc-roguelike-game/issues"
-  },
-  "homepage": "https://github.com/AlysCole/fcc-roguelike-game#readme"
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^6.4.1",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "css-loader": "^0.28.0",
+    "extract-text-webpack-plugin": "^2.1.0",
+    "node-sass": "^4.5.2",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "sass-loader": "^6.0.3",
+    "style-loader": "^0.16.1",
+    "webpack": "^2.4.1",
+    "webpack-dev-server": "^2.4.2"
+  }
 }
