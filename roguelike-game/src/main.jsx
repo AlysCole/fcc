@@ -559,12 +559,10 @@ class Dungeon extends React.Component {
         /* If PC is in a hidden room,... */
         if (dungeon[targetY][targetX].type == "hiddenRoom")
           // Set the distance to more than the minimum distance so NPCs don't detect PC.
-          distance = Infinity; 
-
-        console.log("Distance:", distance);
+          distance = 4; 
 
         // Move NPC towards the PC if within view 
-        if (distance <= 3) {
+        if (distance < 4) {
           console.log("NPC's target:", this.targetX, this.targetY + "\n" +
                       "Current target:", targetX, targetY);
           if (this.targetX != targetX || this.targetY != targetY) {
@@ -585,19 +583,16 @@ class Dungeon extends React.Component {
             // Take NPC off of cell.
             dungeon[this.y][this.x].NPCs.splice(ind, 1);
 
-            console.log("Step being taken:", this.path[0].x, this.path[0].y + "\nTarget:",
-                        targetX, targetY);
             this.x = this.path[0].x; 
             this.y = this.path[0].y;
             console.log(this);
 
             // Push NPC to front of new cell.
-            console.log("Moved to path.");
             dungeon[this.y][this.x].NPCs.unshift(currNPC);
             return dungeon;
           }
         }
-        else if (distance > 3 || dungeon[targetY][targetX].type == "hiddenRoom") {
+        else if (distance >= 4 || dungeon[targetY][targetX].type == "hiddenRoom") {
           let cell = Math.randomBetween(0, adjacents.length - 1);
 
           // otherwise, NPC roams around
@@ -614,6 +609,7 @@ class Dungeon extends React.Component {
             return dungeon;
           }
         }
+        
         return false;
       };
     };
