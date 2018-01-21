@@ -19,19 +19,28 @@ module.exports = {
   module: {
     loaders: [
       {
-        test: /\.jsx$/,
+        test: /\.jsx?$/,
         exclude: [/node_modules/, /styles/],
         include: path.join(__dirname, 'src'),
-        loader: 'babel-loader'
+        loader: 'babel-loader',
+        query:
+        {
+          presets: ['es2015', 'react'],
+          plugins: ['transform-class-properties']
+        }
       },
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        exclude: [/node-modules/]
+        exclude: [/node-modules/],
+        query:
+          {
+            presets: ['es2015', 'react']
+          }
       },
       {
         test: /\.scss$/,
-        loader: ExtractTextPlugin.extract({
+        use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
           use: 'css-loader!sass-loader'
         })
