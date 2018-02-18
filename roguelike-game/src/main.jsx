@@ -8,10 +8,6 @@ Math.randomBetween = (a, b) => {
 };
 
 class Game extends React.Component {
-  initiateCombat = (NPC, target) => {
-    
-  }
-  
   initializeDungeon = () => {
     if (this.state.dungeon.length == 0) {
       for (let y = 0; y < this.state.gridHeight; y++) {
@@ -20,7 +16,7 @@ class Game extends React.Component {
           arr.push(
             {
               type: "empty",
-              NPCs: []
+              chars: []
             }
           );
         }
@@ -139,8 +135,9 @@ class Game extends React.Component {
       Generate a room within the minimum and maximum size of one and
       plot it within the coordinates passed as parameters in the dungeon.
       
-      Returns 0 if fails. Returns 1 if success.
+      Returns 0 if function fails. Returns 1 otherwise.
     */
+
     let rx1 = x1 - x1 + this.state.roomSpacing,
         rx2 = x2 - x1 - this.state.roomSpacing,
         ry1 = y1 - y1 + this.state.roomSpacing,
@@ -265,130 +262,7 @@ class Game extends React.Component {
     }
     return false;
   }
-  
-  NPC = function createNPC(x, y, type, health, attack) {
-    this.type = type,
-    this.x = x,
-    this.y = y,
-    this.direction = {
-      x: Math.randomBetween(-1, 1),
-      y: Math.randomBetween(-1, 1)
-    },
-    this.health = health,
-    this.attack = attack,
-    this.targetX = -1,
-    this.targetY = -1,
-    this.path = [];
-    
-    // Updates NPC position
-    this.update = function updateNPCInDungeon(dungeon, targetX, targetY) {
-      if (this.x == targetX && this.y == targetY) {
-        // run combat code here.
-        
-        return false;
-      }
-      
-      let ind = dungeon[this.y][this.x].NPCs.indexOf(this),
-          adjacents = Grid.getAdjacentCells(this.x, this.y, dungeon).filter(function(curr) {
-            // Filter adjacent cells to room cells.
-            return (curr.cell.type == "room" || curr.cell.type == "corridor");
-          });
-      
-      let distance = Grid.calculateApproxDistance(this.x, this.y,
-                                                  targetX, targetY);
-      
-      // Move NPC towards the PC if within view 
-      if (distance < 4 && dungeon[targetY][targetX].type != "hiddenRoom") {
-        console.log("NPC's target:", this.targetX, this.targetY + "\n" +
-                    "Current target:", targetX, targetY);
-        if (this.targetX != targetX || this.targetY != targetY) {
-          this.path = Grid.determinePath(this.x, this.y,
-                                         targetX, targetY, dungeon);
-          this.targetX = targetX;
-          this.targetY = targetY;
-        }
-        
-        if (this.path && this.path.length > 0) {
-          console.log("Path:", this.path);
-          // Take current coordinates off of path
-          this.path.splice(0, 1);
-          
-          // Move NPC into next step in path
-          let currNPC = this;
-          
-          // Take NPC off of cell.
-          dungeon[this.y][this.x].NPCs.splice(ind, 1);
-          
-          this.x = this.path[0].x; 
-          this.y = this.path[0].y;
-          console.log(this);
-          
-          // Push NPC to front of new cell.
-          dungeon[this.y][this.x].NPCs.unshift(currNPC);
-          return dungeon;
-        }
-      }
-      else if (distance >= 4 || dungeon[targetY][targetX].type == "hiddenRoom") {
-        let cell = Math.randomBetween(0, adjacents.length - 1);
-        
-        // otherwise, NPC roams around
-        if (adjacents[cell].cell.type == "room" ||
-            adjacents[cell].cell.type == "corridor") {
-          let currNPC = this;
-          dungeon[this.y][this.x].NPCs.splice(ind, 1);
-          
-          this.x = adjacents[cell].x,
-          this.y = adjacents[cell].y;
-          
-          dungeon[this.y][this.x].NPCs.unshift(currNPC);
-          
-          return dungeon;
-        }
-      }
-      
-      return false;
-    };
-  };
-  checkNPCExistsAtPoint = (x, y, arr) => {
-    return (arr.filter(function(npc) {
-      return (npc.x == x && npc.y == y);
-    }).length > 0);
-  }
-  
-  getNPCsAtPoint = (x, y, arr) => {
-    return arr.filter(function(npc) {
-      return (npc.x == x && npc.y == y);
-    });
-  }
-  
-  populateWithNPCs = () => {
-    // Modifies dungeon in place and generates NPCs, based on level number
-    let level = this.levels[this.state.level - 1];
-    
-    level.typesOfNPCs.forEach((npc) => {
-      let numOfNPCs = Math.randomBetween(npc.min, npc.max);
-      for (let i = 0; i < numOfNPCs; i++) {
-        let coordinates = Grid.getRandomMatchingCellWithin(0, this.state.dungeon[0].length - 1,
-                                                           0, this.state.dungeon.length - 1,
-                                                           "room", this.state.dungeon);
-        
-        let newNPC = new this.NPC(coordinates.x, coordinates.y,
-                                  npc.type, this.NPCs[npc.type].health,
-                                  this.NPCs[npc.type].attack);
-        this.state.dungeon[coordinates.y][coordinates.x].NPCs.unshift(newNPC);
-        
-        // Run the NPC function every second.
-        window.setInterval(() => {
-          let dungeon = newNPC.update(this.state.dungeon, this.state.centerX, this.state.centerY);
-          if (dungeon)
-            this.setState({
-              dungeon: dungeon
-            });
-        }, 1000);
-      }
-    });
-  }
-  
+
   generateHiddenRooms = (max) => {
     // recursively places hidden rooms on the edges of the dungeon
     let minHiddenRoomWidth = this.levels[this.state.level - 1].minHiddenRoomWidth ||
@@ -466,13 +340,165 @@ class Game extends React.Component {
     return false;
   }
   
+  NPC = function createNPC(x, y, type, health, offense, defense, delay) {
+    this.type = type,
+    this.x = x,
+    this.y = y,
+    this.direction = {
+      x: Math.randomBetween(-1, 1),
+      y: Math.randomBetween(-1, 1)
+    },
+    this.health = health,
+    this.offense = offense,
+    this.defense = defense,
+    this.targetX = -1,
+    this.targetY = -1,
+    this.path = [],
+    this.delay = delay,
+    this.combatIntervalID = 0; // in ms
+    
+    // Updates NPC position
+    this.update = function updateNPCInDungeon(dungeon, targetX, targetY) {
+      if (this.x == targetX && this.y == targetY) {
+        // run combat code here.
+        this.combatIntervalID = this.initiateCombat(dungeon[this.y][this.x].chars);
+        return false;
+      }
+      else if (this.combatInterval != 0) {
+        clearInterval(this.combatIntervalID);
+      }
+      
+      let ind = dungeon[this.y][this.x].chars.indexOf(this),
+          adjacents = Grid.getAdjacentCells(this.x, this.y, dungeon).filter(function(curr) {
+            // Filter adjacent cells to room cells.
+            return (curr.cell.type == "room" || curr.cell.type == "corridor");
+          });
+      
+      let distance = Grid.calculateApproxDistance(this.x, this.y,
+                                                  targetX, targetY);
+      
+      // Move NPC towards the PC if within view 
+      if (distance < 4 && dungeon[targetY][targetX].type != "hiddenRoom") {
+        console.log("NPC's target:", this.targetX, this.targetY + "\n" +
+                    "Current target:", targetX, targetY);
+        if (this.targetX != targetX || this.targetY != targetY) {
+          this.path = Grid.determinePath(this.x, this.y,
+                                         targetX, targetY, dungeon);
+          this.targetX = targetX;
+          this.targetY = targetY;
+        }
+        
+        if (this.path && this.path.length > 0) {
+          console.log("Path:", this.path);
+          // Take current coordinates off of path
+          this.path.splice(0, 1);
+          
+          // Move NPC into next step in path
+          let currNPC = this;
+          
+          // Take NPC out of cell's chars array.
+          dungeon[this.y][this.x].chars.splice(ind, 1);
+          
+          this.x = this.path[0].x; 
+          this.y = this.path[0].y;
+          console.log(this);
+          
+          // Push NPC to the top of the chars array in the new cell.
+          dungeon[this.y][this.x].chars.unshift(currNPC);
+          return dungeon;
+        }
+      }
+      else if (distance >= 4 || dungeon[targetY][targetX].type == "hiddenRoom") {
+        let cell = Math.randomBetween(0, adjacents.length - 1);
+        
+        // otherwise, NPC roams around
+        if (adjacents[cell].cell.type == "room" ||
+            adjacents[cell].cell.type == "corridor") {
+          let currNPC = this;
+          dungeon[this.y][this.x].chars.splice(ind, 1);
+          
+          this.x = adjacents[cell].x,
+          this.y = adjacents[cell].y;
+          
+          dungeon[this.y][this.x].chars.unshift(currNPC);
+          
+          return dungeon;
+        }
+      }
+      
+      return false;
+    };
+
+    this.initiateCombat = function combatFunc(chars, targetX, targetY) {
+      let combatIntervalID = window.setInterval(() => {
+       /*
+        * the last to enter the room gets the first move -- judge by order of the
+        * chars array in current room.
+        */
+
+        
+      }, 800); // run combat interval every 800ms.
+
+      return combatIntervalID; // return the combat interval to refer to later on.
+    };
+ 
+  };
+
+  checkNPCExistsAtPoint = (x, y, arr) => {
+    return (arr.filter(function(npc) {
+      return (npc.x == x && npc.y == y);
+    }).length > 0);
+  }
   
+  getNPCsAtPoint = (x, y, arr) => {
+    return arr.filter(function(npc) {
+      return (npc.x == x && npc.y == y);
+    });
+  }
+  
+  populateWithNPCs = () => {
+    // Modifies dungeon in place and generates NPCs, based on level number
+    let level = this.levels[this.state.level - 1];
+    
+    level.typesOfNPCs.forEach((npc) => {
+      let numOfNPCs = Math.randomBetween(npc.min, npc.max);
+      for (let i = 0; i < numOfNPCs; i++) {
+        let coordinates = Grid.getRandomMatchingCellWithin(0, this.state.dungeon[0].length - 1,
+                                                           0, this.state.dungeon.length - 1,
+                                                           "room", this.state.dungeon);
+        
+        let newNPC = new this.NPC(coordinates.x,
+                                  coordinates.y,
+                                  npc.type,
+                                  this.NPCs[npc.type].health,
+                                  this.NPCs[npc.type].offense,
+                                  this.NPCs[npc.type].defense,
+                                  this.NPCs[npc.type].delay);
+        this.state.dungeon[coordinates.y][coordinates.x].chars.unshift(newNPC);
+        
+        // Run the NPC function every {newNPC.delay}ms
+        window.setInterval(() => {
+          let dungeon = newNPC.update(this.state.dungeon, this.state.player.x, this.state.player.y);
+          if (dungeon)
+            this.setState({
+              dungeon: dungeon
+            });
+        }, newNPC.delay);
+      }
+    });
+  }
+
+  // function to initiate and run combat as long as NPC(s) and PC are in the same
+  // room.
+
   handleKeyDown = (event) => {
     if (event.keyCode < 37 || event.keyCode > 40)
       return false;
     
-    let x = this.state.centerX,
-        y = this.state.centerY;
+    let x = this.state.player.x,
+        y = this.state.player.y,
+        newX = this.state.player.x,
+        newY = this.state.player.y;
     
     if (this.state.movementDelay) { // check if movement delay is true 
       if (this.state.movementLag < this.state.movementDelay) {
@@ -484,25 +510,33 @@ class Game extends React.Component {
     }
     
     if (event.keyCode == 37) { // left arrow key
-      x -= 1;
+      newX -= 1;
     }
     else if (event.keyCode == 38) { // up arrow key
-      y -= 1;
+      newY -= 1;
     }
     else if (event.keyCode == 39) { // right arrow key
-      x += 1;
+      newX += 1;
     }
     else if (event.keyCode == 40) { // down arrow key
-      y += 1;
+      newY += 1;
     }
     
-    if ((this.state.dungeon[y] && this.state.dungeon[y][x]) &&
-        (this.state.dungeon[y][x].type == "room" ||
-         this.state.dungeon[y][x].type == "hiddenRoom" ||
-         this.state.dungeon[y][x].type == "corridor")) {
+    if ((this.state.dungeon[newY] && this.state.dungeon[newY][newX]) &&
+        (this.state.dungeon[newY][newX].type == "room" ||
+         this.state.dungeon[newY][newX].type == "hiddenRoom" ||
+         this.state.dungeon[newY][newX].type == "corridor")) {
+      let dungeon = this.state.dungeon;
+
+      dungeon[y][x].chars.splice(dungeon[y][x].chars.indexOf(this.state.player), 1);
+
+      this.state.player.x = newX,
+      this.state.player.y = newY;
+
+      dungeon[newY][newX].chars.unshift(this.state.player);
+
       this.setState({
-        centerX: x,
-        centerY: y
+        dungeon: dungeon
       });
       
       return true;
@@ -519,9 +553,16 @@ class Game extends React.Component {
     
     this.state = {
       dungeon: [],
-      level: 3,
-      currHP: 100,
-      maxHP: 100,
+      level: 2,
+      player: {
+        type: "player",
+        x: 0,
+        y: 0,
+        currHP: 30,
+        maxHP: 30,
+        offense: 8,
+        defense: 0
+      },
       minRoomHeight: 5,
       minRoomWidth: 7,
       maxRoomHeight: 6,
@@ -539,9 +580,7 @@ class Game extends React.Component {
       roomSpacing: 2,
       gridWidth: 40,
       gridHeight: 30,
-      randomCorridors: 0, // (0-100) Higher input means more chance of generating non-straight corridors
-      centerX: 0,
-      centerY: 0
+      randomCorridors: 0 // (0-100) Higher input means more chance of generating non-straight corridors
     };
     
     this.levels = [ 
@@ -595,21 +634,44 @@ class Game extends React.Component {
     ];
     
     this.NPCs = {
+      /* SCORES
+       * Base the health points, attack points, and delay on the
+       * monster's level.
+       *
+       * HEALTH FORMULA
+       * health = level * 20
+       * 
+       * ATTACK FORMULA
+       * attack = level + 3
+       *
+       * DELAY FORMULA
+       * (should slow down as HP goes up)
+       * delay = 1000 - ((health - 80%)  * 10)
+       */
+
       monster1: {
         health: 20,
-        attack: 5
+        offense: 4,
+        defense: 1,
+        delay: 1000 - ((20 - (0.80 * 20)) * 10)
       },
       monster2: {
         health: 40,
-        attack: 8
+        offense: 7,
+        defense: 3,
+        delay: 1000 - ((40 - (0.80 * 40)) * 10)
       },
       monster3: {
         health: 60,
-        attack: 10
+        offense: 10,
+        defense: 5,
+        delay: 1000 - ((60 - (0.80 * 60)) * 10)
       },
       bossMonster: {
         health: 120,
-        attack: 20
+        offense: 20,
+        defense: 10,
+        delay: 1000 - ((120 - (0.80 * 120)) * 10)
       }
     };
 
@@ -618,16 +680,18 @@ class Game extends React.Component {
     let center = Grid.getRandomMatchingCellWithin(0, this.state.dungeon[0].length - 1,
                                                   0, this.state.dungeon.length - 1,
                                                   "room", this.state.dungeon);
-    this.state.centerX = center.x,
-    this.state.centerY = center.y;
+    this.state.player.x = center.x,
+    this.state.player.y = center.y;
+
+    this.state.dungeon[center.y][center.x].chars.unshift(this.state.player);
   }
   
   render() {
     return (
       <div className="game">
-        <HealthBar currHP={this.state.currHP} maxHP={this.state.maxHP} className="pc-health-bar" />
+        <HealthBar currHP={this.state.player.currHP} maxHP={this.state.player.maxHP} className="pc-health-bar" />
         <Viewport dungeon={this.state.dungeon}
-                  centerX={this.state.centerX} centerY={this.state.centerY}
+                  player={this.state.player}
                   NPCs={this.NPCs} />
       </div>
     );
@@ -685,28 +749,26 @@ class EquipmentList extends React.Component {
 
 class Viewport extends React.Component {
   getRectangularViewFromPoint = (centerX, centerY, radius, dungeon) => {
-    let viewCoordinates = {
-      x1: (centerX - 1) - Math.floor(this.state.viewPortWidth / 2),
-      x2: (centerX - 1) + Math.floor(this.state.viewPortWidth / 2),
-      y1: (centerY - 1) - Math.floor(this.state.viewPortHeight / 2),
-      y2: (centerY - 1) + Math.floor(this.state.viewPortHeight / 2) 
-    };
     
+    let viewCoordinates = {
+      x1: (centerX) - Math.floor(this.state.viewPortWidth / 2),
+      x2: (centerX) + Math.floor(this.state.viewPortWidth / 2),
+      y1: (centerY) - Math.floor(this.state.viewPortHeight / 2),
+      y2: (centerY) + Math.floor(this.state.viewPortHeight / 2) 
+    };
     
     let view = [];
     
     for (let y = viewCoordinates.y1; y <= viewCoordinates.y2; y++) {
       let cellsInRow = [];
       for (let x = viewCoordinates.x1; x <= viewCoordinates.x2; x++) {
-        if (x == centerX && y == centerY)
-          cellsInRow.push("player");
-        else if (!(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2) < Math.pow(radius, 2))
+        if (!(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2) < Math.pow(radius, 2))
                  && this.state.darkViewToggle) {
           cellsInRow.push("null");
         }
-        else if (dungeon[y] && dungeon[y][x]) {
-          if (dungeon[y][x].NPCs.length > 0) {
-            cellsInRow.push(dungeon[y][x].NPCs[0].type);
+        else if (dungeon && dungeon[y] && dungeon[y][x]) { 
+          if (dungeon[y][x].chars.length > 0) {
+            cellsInRow.push(dungeon[y][x].chars[0].type);
           }
           else if (dungeon[y][x].type == "hiddenRoom") { // check if the cell is a hidden room
             let distance = Grid.calculateApproxDistance(x, y, centerX, centerY);
@@ -735,20 +797,17 @@ class Viewport extends React.Component {
         this.props.centerY != nextProps.centerY) {
       this.setState({
         dungeon: nextProps.dungeon,
-        playerCell: {
-          x: nextProps.centerX,
-          y: nextProps.centerY
-        },
-        dungeonView: this.getRectangularViewFromPoint(nextProps.centerX,
-                                                      nextProps.centerY,
+        player: nextProps.player,
+        dungeonView: this.getRectangularViewFromPoint(nextProps.player.x,
+                                                      nextProps.player.x,
                                                       nextProps.dungeon)
       });
     }
   }
   
   componentWillUpdate = (nextProps, nextState) => {
-    nextState.dungeonView = this.getRectangularViewFromPoint(nextState.playerCell.x,
-                                                             nextState.playerCell.y,
+    nextState.dungeonView = this.getRectangularViewFromPoint(nextState.player.x,
+                                                             nextState.player.y,
                                                              nextState.darkViewRadius,
                                                              nextState.dungeon);
   }
@@ -761,10 +820,7 @@ class Viewport extends React.Component {
       dungeonView: [],
       cellWidth: 20,
       cellHeight: 20,
-      playerCell: {
-        x: this.props.centerX,
-        y: this.props.centerY
-      },
+      player: this.props.player,
       movementLag: 0,
       movementDelay: 0,
       viewPortHeight: 15,
@@ -819,8 +875,8 @@ class Viewport extends React.Component {
     }
     
     // Generate a dungeon with HTML5 Canvas
-    this.state.dungeonView = this.getRectangularViewFromPoint(this.state.playerCell.x,
-                                                              this.state.playerCell.y,
+    this.state.dungeonView = this.getRectangularViewFromPoint(this.state.player.x,
+                                                              this.state.player.y,
                                                               this.state.darkViewRadius,
                                                               this.state.dungeon);
     
