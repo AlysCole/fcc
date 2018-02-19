@@ -8,8 +8,8 @@ module.exports = {
     main: './src/main.jsx'
   },
   output: {
-    publicPath: '/dist/',
-    path: path.join(__dirname, 'dist/'),
+    path: path.resolve(__dirname, 'dist'),
+    publicPath: path.resolve(__dirname, 'assets'),
     filename: '[name].js'
   },
   devtool: 'source-map',

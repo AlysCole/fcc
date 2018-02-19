@@ -8,11 +8,31 @@ The premise of the game is that it will act, in essence, like a regular dungeon 
 Because of the way I've set up my FreeCodeCamp projects' repo, you'll have to do a sparse clone to pull this particular project.
 
 ```
-mkdir <repo>
-cd <repo>
+mkdir roguelike-game 
+cd roguelike-game
 git init
 git remote add -f origin https://github.com/AlysCole/freecodecamp.git
 git config core.sparseCheckout true
 echo "roguelike-game/" >> .git/info/sparse-checkout
 git pull origin master
 ```
+
+## Running
+
+You'll need to have the dependencies installed through `npm`. Make sure you have [`npm`](https://github.com/npm/npm) installed before proceeding.
+
+Once `npm` is installed, you can install the dependencies through this command:
+
+```
+npm install
+```
+
+This will install the dependencies locally.
+
+Make sure you have `npm` in your `PATH` before running:
+
+```
+webpack -p
+```
+
+Open your favorite web browser and navigate to the `index.html` in the project folder.
