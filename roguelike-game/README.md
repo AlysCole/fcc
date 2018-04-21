@@ -37,4 +37,4 @@ webpack -p
 
 Open your favorite web browser and navigate to the `index.html` in the project folder.
 
-The game can also be viewed through Github Pages at [https://alyscole.github.io/freecodecamp/roguelike-game].
+The game can also be viewed through [Github Pages](https://alyscole.github.io/fcc/roguelike-game).
