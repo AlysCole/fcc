@@ -4,13 +4,17 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
   entry: {
-    Grid: './src/Grid.js',
-    main: './src/main.jsx'
+    main: path.resolve(__dirname, 'src/main.jsx')
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    publicPath: path.resolve(__dirname, 'assets'),
-    filename: '[name].js'
+    filename: 'main.js',
+    path: path.join(__dirname, 'public'),
+    publicPath: '/public/',
+  },
+  devServer: {
+    contentBase: path.join(__dirname, 'public'),
+    publicPath: '/public/',
+    inline: true,
   },
   devtool: 'source-map',
   plugins: [
@@ -20,7 +24,7 @@ module.exports = {
     loaders: [
       {
         test: /\.jsx?$/,
-        exclude: [/node_modules/, /styles/],
+        exclude: [/node_modules/, /styles/, /public/],
         include: path.join(__dirname, 'src'),
         loader: 'babel-loader',
         query:
@@ -32,7 +36,8 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        exclude: [/node-modules/],
+        exclude: [/node-modules/, /public/],
+        include: path.join(__dirname, 'src'),
         query:
           {
             presets: ['es2015', 'react']

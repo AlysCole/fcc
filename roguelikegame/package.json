@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "build": "webpack -p",
-    "start": "webpack-dev-server --hot --progress --colors --inline"
+    "start": "webpack-dev-server --config webpack.config.dev.js --color --progress"
   },
   "repository": {
     "type": "git",

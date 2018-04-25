@@ -61,6 +61,8 @@ span {
 
 .health-bar-fill {
   display: inline-block;
+  border: 1px solid black;
+  box-sizing: border-box;
   margin: 0;
   height: 100%;
   width: 10px;
