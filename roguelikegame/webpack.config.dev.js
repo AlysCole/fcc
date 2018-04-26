@@ -9,12 +9,11 @@ module.exports = {
   output: {
     filename: 'main.js',
     path: path.join(__dirname, 'public'),
-    publicPath: '/public/',
+    publicPath: '/public/'
   },
   devServer: {
-    contentBase: path.join(__dirname, 'public'),
-    publicPath: '/public/',
-    inline: true,
+    publicPath: '/',
+    inline: true
   },
   devtool: 'source-map',
   plugins: [
