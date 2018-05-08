@@ -4,17 +4,15 @@
   "description": "",
   "scripts": {
     "build": "webpack -p",
-    "start": "webpack-dev-server --config webpack.config.dev.js --color --progress"
+    "dev":
+      "webpack-dev-server --config webpack.config.dev.js --color --progress",
+    "start": "webpack-dev-server --config webpack.config.js --color --progress"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/AlysCole/freecodecamp/tree/master/roguelike-game"
   },
-  "keywords": [
-    "roguelike",
-    "dungeon",
-    "game"
-  ],
+  "keywords": ["roguelike", "dungeon", "game"],
   "author": "Alyssa Alvarez",
   "license": "ISC",
   "devDependencies": {
@@ -29,6 +27,7 @@
     "css-loader": "^0.28.0",
     "extract-text-webpack-plugin": "^2.1.0",
     "node-sass": "^4.5.2",
+    "prettier": "1.12.1",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "sass-loader": "^6.0.3",
