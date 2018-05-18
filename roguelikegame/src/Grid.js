@@ -1,4 +1,8 @@
 const Grid = {
+  isWithin: (x, y, rx1, rx2, ry1, ry2) => {
+    // return true if the coordinates x and y are within the coordinates rx.
+    return x >= rx1 && x <= rx2 && (y >= ry1 && y <= ry2);
+  },
   getAdjacentCells: (x, y, grid, noDiagonal) => {
     // returns an array of adjacent cells.
     var adjacents = [];

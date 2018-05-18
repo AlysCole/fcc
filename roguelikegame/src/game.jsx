@@ -4,6 +4,11 @@ import HealthBar from "./healthbar.jsx";
 import Viewport from "./viewport/index.jsx";
 
 export default class Game extends React.Component {
+  // helper functions
+  getPlayerCell = () => {
+    return this.state.dungeon[this.state.player.y][this.state.player.x];
+  };
+
   initializeDungeon = () => {
     if (this.state.dungeon.length == 0) {
       for (let y = 0; y < this.config.gridHeight; y++) {
@@ -207,10 +212,10 @@ export default class Game extends React.Component {
     var currDirection = Grid.randomDirection();
     var otherDirection = currDirection == "x" ? "y" : "x";
 
-    // if target coordinate is equal to starting coordinate and...
+    // if the target coordinate is equal to starting coordinate and the other
+    // coordinate is not equal to the starting coordinate
     if (
       r2Point[currDirection] == r1Point[currDirection] &&
-      // the other coordinate is not equal to the starting coordinate
       r2Point[otherDirection] != r1Point[otherDirection]
     )
       // set direction to the other axis
@@ -581,8 +586,8 @@ export default class Game extends React.Component {
         type: "player",
         x: 0,
         y: 0,
-        currHP: 30,
-        maxHP: 30,
+        health: 30,
+        maxHealth: 30,
         offense: 8,
         defense: 0
       },
@@ -860,11 +865,18 @@ export default class Game extends React.Component {
   render() {
     return (
       <div className="game">
-        <HealthBar
-          currHP={this.state.player.currHP}
-          maxHP={this.state.player.maxHP}
-          className="pc-health-bar"
-        />
+        <div className="top-bar">
+          {this.getPlayerCell().chars.map((char, ind) => {
+            return (
+              <HealthBar
+                type={char.type}
+                key={ind}
+                currHP={char.health}
+                maxHP={char.maxHealth}
+              />
+            );
+          })}
+        </div>
         <Viewport
           dungeon={this.state.dungeon}
           player={this.state.player}

@@ -139,13 +139,13 @@ export default class Viewport extends React.Component {
     return (
       <div>
         {this.state.dungeonView.map((row, ind) => {
-          let viewportCells = row.map((cell, ind) => {
+          const viewportCells = row.map((cell, ind) => {
             // Get index key based on value of cell
             return (
               <ViewportCell
                 key={ind}
                 type={cell}
-                class={this.classNames[cell]}
+                className={this.classNames[cell]}
                 symbol={this.symbols[cell]}
               />
             );

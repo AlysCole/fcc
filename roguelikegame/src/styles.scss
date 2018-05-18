@@ -51,7 +51,7 @@ span {
   color: #C40F0F;
 }
 
-.health-bar-container {
+.healthbar-container {
   width: 100px;
   height: 20px;
   color: black;
@@ -59,12 +59,16 @@ span {
   text-align: left;
 }
 
-.health-bar-fill {
+.healthbar-fill {
   display: inline-block;
   border: 1px solid black;
   box-sizing: border-box;
   margin: 0;
   height: 100%;
   width: 10px;
+  background: red;
+}
+
+.player-healthbar {
   background: green;
 }

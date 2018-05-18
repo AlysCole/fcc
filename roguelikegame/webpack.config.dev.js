@@ -18,7 +18,7 @@ module.exports = {
   },
   devtool: "source-map",
   plugins: [new ExtractTextPlugin("./styles.css")],
-  module: 
+  module: {
     loaders: [
       {
         test: /\.jsx?$/,
