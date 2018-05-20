@@ -9,6 +9,22 @@ export default class Game extends React.Component {
     return this.state.dungeon[this.state.player.y][this.state.player.x];
   };
 
+  setNPCInterval = npc => {
+    window.setTimeout(() => {
+      const dungeon = npc.update(
+        this.state.dungeon,
+        this.state.player.x,
+        this.state.player.y
+      );
+      if (dungeon) {
+        this.setState({
+          dungeon: dungeon
+        });
+      }
+      window.setTimeout(() => this.setNPCInterval(npc), npc.delay);
+    });
+  };
+
   initializeDungeon = () => {
     if (this.state.dungeon.length == 0) {
       for (let y = 0; y < this.config.gridHeight; y++) {
@@ -385,6 +401,8 @@ export default class Game extends React.Component {
     offense,
     defense,
     delay,
+    walkDelay,
+    runDelay,
     calculatePath
   ) {
     this.type = type;
@@ -402,10 +420,12 @@ export default class Game extends React.Component {
     this.targetY = -1;
     this.path = [];
     this.delay = delay;
+    this.walkDelay = walkDelay;
+    this.runDelay = runDelay;
     this.calculatePath = calculatePath;
 
     // Updates NPC position
-    this.update = (dungeon, targetX, targetY) => {
+    this.update = function(dungeon, targetX, targetY) {
       if (this.x == targetX && this.y == targetY) {
         // run combat code here.
         this.combatIntervalID = this.initiateCombat(
@@ -419,11 +439,8 @@ export default class Game extends React.Component {
       const ind = dungeon[this.y][this.x].chars.indexOf(this);
       this.path = this.calculatePath(dungeon, this.x, this.y, targetX, targetY);
 
-      if (this.path && this.path.length > 1) {
+      if (this.path.length > 0) {
         console.log("Path:", this.path);
-        // Take current coordinates off of path
-        this.path.splice(0, 1);
-
         // Move NPC into next step in path
         let currNPC = this;
 
@@ -436,12 +453,12 @@ export default class Game extends React.Component {
 
         // Push NPC to the top of the chars array in the new cell.
         dungeon[this.y][this.x].chars.unshift(currNPC);
+
         return dungeon;
       }
       return false;
     };
-
-    this.initiateCombat = (chars, targetX, targetY) => {
+    this.initiateCombat = function(chars, targetX, targetY) {
       let combatIntervalID = window.setInterval(() => {
         /*
          * the last to enter the room gets the first move -- judge by order of the
@@ -491,29 +508,20 @@ export default class Game extends React.Component {
           this.NPCs[npc.type].offense,
           this.NPCs[npc.type].defense,
           this.NPCs[npc.type].delay,
+          this.NPCs[npc.type].walkDelay,
+          this.NPCs[npc.type].runDelay,
           this.NPCs[npc.type].calculatePath
         );
         this.state.dungeon[coordinates.y][coordinates.x].chars.unshift(newNPC);
 
         // Run the NPC function every {newNPC.delay}ms
-        window.setInterval(() => {
-          let dungeon = newNPC.update(
-            this.state.dungeon,
-            this.state.player.x,
-            this.state.player.y
-          );
-          if (dungeon)
-            this.setState({
-              dungeon: dungeon
-            });
-        }, newNPC.delay);
+        this.setNPCInterval(newNPC);
       }
     });
   };
 
   // function to initiate and run combat as long as NPC(s) and PC are in the same
   // room.
-
   handleKeyDown = event => {
     if (event.keyCode < 37 || event.keyCode > 40) return false;
 
@@ -675,7 +683,9 @@ export default class Game extends React.Component {
         health: 20,
         offense: 4,
         defense: 1,
-        delay: 1000 - (20 - 0.8 * 20) * 10,
+        walkDelay: 750,
+        runDelay: 150,
+        delay: 500,
         // function that returns the coordinates for the NPC's next move.
         calculatePath: function getRatCoords(dungeon, x, y, playerX, playerY) {
           // the 'rat' should be sent into a panic once the PC nears it.
@@ -691,20 +701,28 @@ export default class Game extends React.Component {
           const adjacent = Grid.getAdjacentCells(x, y, dungeon).filter(function(
             curr
           ) {
-            return curr.cell.type == "room" || curr.cell.type == "corridor";
+            return curr.cell.type === "room" || curr.cell.type === "corridor";
           });
 
-          // initiate the path with the NPC's current coordinates
-          let path = [{ x: x, y: y }];
+          let path = [],
+            delay;
           // return the path with a random set of coordinates if the PC is
           // within view OR out of a 3 out of 10 possibility
           if (
-            (distance < 6 && dungeon[playerY][playerX].type != "hiddenRoom") ||
+            (distance < 5 && dungeon[playerY][playerX].type != "hiddenRoom") ||
             Math.random() < 0.3
           ) {
             // push a random set of adjacent coordinates to the path
-            path.push(adjacent[Math.randomBetween(0, adjacent.length)]);
+            path.push(adjacent[Math.randomBetween(0, adjacent.length - 1)]);
+            // lower the delay of movement to simulate panicked running
+            delay = this.runDelay;
+          } else {
+            delay = this.walkDelay;
           }
+          if (this.delay != delay) {
+            this.delay = delay;
+          }
+
           return path;
         }
       },
@@ -713,7 +731,9 @@ export default class Game extends React.Component {
         health: 40,
         offense: 7,
         defense: 3,
-        delay: 1000 - (40 - 0.8 * 40) * 10,
+        walkDelay: 900,
+        runDelay: 350,
+        delay: 850,
         // return a random set of adjacent coordinates -or- coordinates directly
         // away from the PC
         calculatePath: function getKidCoords(dungeon, x, y, playerX, playerY) {
@@ -723,8 +743,8 @@ export default class Game extends React.Component {
           ) {
             return curr.cell.type == "room" || curr.cell.type == "corridor";
           });
-          // initiate the path with the NPC's current coordinates
-          let path = [{ x: x, y: y }];
+
+          let path = [];
           if (distance < 2 && dungeon[playerY][playerX].type != "hiddenRoom") {
             // randomly return either a random set of adjacent coordinates or
             // the farthest coordinates from the PC
@@ -758,10 +778,13 @@ export default class Game extends React.Component {
             } else {
               // push a random set of coordinates from the array of adjacent sets of
               // coordinates
-              path.push(adjacent[Math.randomBetween(0, adjacent.length)]);
+              path.push(adjacent[Math.randomBetween(0, adjacent.length - 1)]);
             }
+            // set delay lower to simulate running
+            this.delay = this.runDelay;
           } else {
-            path.push(adjacent[Math.randomBetween(0, adjacent.length)]);
+            path.push(adjacent[Math.randomBetween(0, adjacent.length - 1)]);
+            this.delay = this.walkDelay;
           }
           // return the path
           return path;
@@ -772,7 +795,9 @@ export default class Game extends React.Component {
         health: 60,
         offense: 10,
         defense: 5,
-        delay: 1000 - (60 - 0.8 * 60) * 10,
+        walkDelay: 1000,
+        runDelay: 250,
+        delay: 700,
         // return the coordinates farthest away from the PC
         calculatePath: function getAdultCoords(
           dungeon,
@@ -787,8 +812,8 @@ export default class Game extends React.Component {
           ) {
             return curr.cell.type == "room" || curr.cell.type == "corridor";
           });
-          // initiate the path with the current NPC's coordinates
-          let path = [{ x: x, y: y }];
+
+          let path = [];
           if (distance < 4 && dungeon[playerY][playerX].type != "hiddenRoom") {
             // push coordinates furthest away from the PC to the path array
             path.push(
@@ -811,9 +836,11 @@ export default class Game extends React.Component {
                 return coords;
               })
             );
+            this.delay = this.runDelay;
           } else {
             // push a random set of adjacent coordinates
-            path.push(adjacent[Math.randomBetween(0, adjacent.length)]);
+            path.push(adjacent[Math.randomBetween(0, adjacent.length - 1)]);
+            this.delay = this.walkDelay;
           }
           return path;
         }
@@ -838,10 +865,7 @@ export default class Game extends React.Component {
           ) {
             return curr.cell.type == "room" || curr.cell.type == "corridor";
           });
-          return [
-            { x: x, y: y },
-            adjacent[Math.randomBetween(0, adjacent.length)]
-          ];
+          return [adjacent[Math.randomBetween(0, adjacent.length - 1)]];
         }
       }
     };
