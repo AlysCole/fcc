@@ -15,6 +15,13 @@ span {
   overflow: hidden;
 }
 
+.row {
+  
+}
+
+.cell-container {
+}
+
 .cell {
   background: #DED9D6;
 }
@@ -51,9 +58,13 @@ span {
   color: #C40F0F;
 }
 
+.top-bar {
+  position: fixed;
+  width: 100%;
+  height: 100px;
+}
+
 .healthbar-container {
-  position: absolute;
-  float: left;
   width: 100px;
   height: 20px;
   color: black;

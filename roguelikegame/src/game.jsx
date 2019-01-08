@@ -551,6 +551,10 @@ export default class Game extends React.Component {
     } else if (event.keyCode == 40) {
       // down arrow key
       newY += 1;
+    } else if (event.keyCode == 67) {
+      // 'c' key
+      if (this.state.dungeon[y][x].chars > 0) {
+      }
     }
 
     if (
@@ -685,7 +689,7 @@ export default class Game extends React.Component {
         defense: 1,
         walkDelay: 750,
         runDelay: 150,
-        delay: 500,
+        delay: 900,
         // function that returns the coordinates for the NPC's next move.
         calculatePath: function getRatCoords(dungeon, x, y, playerX, playerY) {
           // the 'rat' should be sent into a panic once the PC nears it.
@@ -733,7 +737,7 @@ export default class Game extends React.Component {
         defense: 3,
         walkDelay: 900,
         runDelay: 350,
-        delay: 850,
+        delay: 1300,
         // return a random set of adjacent coordinates -or- coordinates directly
         // away from the PC
         calculatePath: function getKidCoords(dungeon, x, y, playerX, playerY) {
@@ -797,7 +801,7 @@ export default class Game extends React.Component {
         defense: 5,
         walkDelay: 1000,
         runDelay: 250,
-        delay: 700,
+        delay: 1500,
         // return the coordinates farthest away from the PC
         calculatePath: function getAdultCoords(
           dungeon,
@@ -849,7 +853,7 @@ export default class Game extends React.Component {
         health: 120,
         offense: 20,
         defense: 10,
-        delay: 1000 - (120 - 0.8 * 120) * 10,
+        delay: 1500 - (120 - 0.8 * 120) * 10,
         // return a path that leads to the PC; simulate the NPC attempting to
         // attack the PC
         calculatePath: function getBossCoords(dungeon, x, y, playerX, playerY) {

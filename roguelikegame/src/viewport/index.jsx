@@ -56,7 +56,7 @@ export default class Viewport extends React.Component {
         player: nextProps.player,
         dungeonView: this.getRectangularViewFromPoint(
           nextProps.player.x,
-          nextProps.player.x,
+          nextProps.player.y,
           nextProps.dungeon
         )
       });
@@ -151,7 +151,11 @@ export default class Viewport extends React.Component {
             );
           });
 
-          return <div key={ind}>{viewportCells}</div>;
+          return (
+            <div className="row" key={ind}>
+              {viewportCells}
+            </div>
+          );
         })}
       </div>
     );

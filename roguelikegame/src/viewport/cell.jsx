@@ -20,6 +20,7 @@ export default class ViewportCell extends React.Component {
 
   render() {
     let classNames = `${this.state.className} cell`;
+
     return <span className={classNames}>{this.state.symbol}</span>;
   }
 }
