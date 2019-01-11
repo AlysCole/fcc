@@ -1,4 +1,5 @@
 const Grid = require("./Grid");
+const utilities = require("./utilities");
 import React from "react";
 import HealthBar from "./healthbar.jsx";
 import Viewport from "./viewport/index.jsx";
@@ -423,11 +424,15 @@ export default class Game extends React.Component {
     this.walkDelay = walkDelay;
     this.runDelay = runDelay;
     this.calculatePath = calculatePath;
+    this.paused = false;
 
     // Updates NPC position
     this.update = function(dungeon, targetX, targetY) {
-      if (this.x == targetX && this.y == targetY) {
-        // run combat code here.
+      // if the NPC is paused, do not update/move position
+      if (this.paused) return false;
+
+      if (this.x == targetX && this.y == targetY && this.paused) {
+        // run combat code here
         this.combatIntervalID = this.initiateCombat(
           dungeon[this.y][this.x].chars
         );
@@ -554,6 +559,13 @@ export default class Game extends React.Component {
     } else if (event.keyCode == 67) {
       // 'c' key
       if (this.state.dungeon[y][x].chars > 0) {
+        // capture a random NPC within the same cell
+        const charIndex = Math.randomBetween(
+          0,
+          this.state.dungeon[y][x].chars.length
+        );
+        const npc = this.state.dungeon[y][x].chars[charIndex];
+        npc.paused = true;
       }
     }
 
