@@ -10,7 +10,40 @@ export default class Game extends React.Component {
     return this.state.dungeon[this.state.player.y][this.state.player.x];
   };
 
-  setNPCInterval = npc => {
+  killNPC = npc => {
+    let ind = this.state.NPCs.indexOf(npc);
+    let combatIntervalID = this.state.combatIntervalID;
+    let combatTurns = this.state.combatTurns;
+    let dungeon = this.state.dungeon;
+
+    if (ind > -1) {
+      combatTurns = combatTurns.remove(npc);
+      // stop combat if no other NPCs are engaged in combat
+      if (combatTurns.length <= 1) {
+        clearInterval(combatIntervalID);
+        combatIntervalID = null;
+        combatTurns = [];
+      }
+
+      // remove from dungeon
+      dungeon[npc.y][npc.x].chars.splice(
+        dungeon[npc.y][npc.x].chars.indexOf(npc),
+        1
+      );
+
+      this.setState({
+        NPCs: this.state.NPCs.remove(npc),
+        dungeon: dungeon,
+        combatIntervalID: combatIntervalID,
+        combatTurns: combatTurns
+      });
+    }
+  };
+
+  setNPCTimeout = npc => {
+    // break out of function if NPC no longer exists
+    if (this.state.NPCs.indexOf(npc) === -1) return false;
+
     window.setTimeout(() => {
       const dungeon = npc.update(
         this.state.dungeon,
@@ -22,7 +55,10 @@ export default class Game extends React.Component {
           dungeon: dungeon
         });
       }
-      window.setTimeout(() => this.setNPCInterval(npc), npc.delay);
+      npc.moveTimeout = window.setTimeout(
+        () => this.setNPCTimeout(npc),
+        npc.delay
+      );
     });
   };
 
@@ -283,8 +319,8 @@ export default class Game extends React.Component {
       { x: -1, y: -1 } // north-west
     ];
 
-    for (let y in this.state.dungeon) {
-      for (let x in this.state.dungeon[y]) {
+    for (let y = 0; y < this.state.dungeon.length; y++) {
+      for (let x = 0; x < this.state.dungeon[y].length; x++) {
         if (
           this.state.dungeon[y][x].type == "room" ||
           this.state.dungeon[y][x].type == "corridor"
@@ -395,6 +431,7 @@ export default class Game extends React.Component {
   };
 
   NPC = function createNPC(
+    game,
     x,
     y,
     type,
@@ -425,27 +462,36 @@ export default class Game extends React.Component {
     this.runDelay = runDelay;
     this.calculatePath = calculatePath;
     this.paused = false;
+    this.moveTimeout = null;
 
     // Updates NPC position
     this.update = function(dungeon, targetX, targetY) {
       // if the NPC is paused, do not update/move position
       if (this.paused) return false;
 
-      if (this.x == targetX && this.y == targetY && this.paused) {
-        // run combat code here
-        this.combatIntervalID = this.initiateCombat(
-          dungeon[this.y][this.x].chars
-        );
+      if (this.x == targetX && this.y == targetY) {
+        const ind = game.state.combatTurns.indexOf(this);
+        if (ind == -1) game.initiateCombat(this, ind);
         return false;
-      } else if (this.combatInterval != 0) {
-        clearInterval(this.combatIntervalID);
+      } else if (this.x != targetX || this.y != targetY) {
+        if (game.state.combatIntervalID) {
+          // remove NPC from combatTurns array if found
+          const ind = game.state.combatTurns.indexOf(this);
+          if (ind > -1) game.state.combatTurns.splice(ind, 1);
+
+          if (game.state.combatTurns.length <= 1) {
+            // kill running combat interval if PC is not engaged in combat
+            clearInterval(game.state.combatIntervalID);
+            game.state.combatIntervalID = null;
+          }
+        }
       }
 
-      const ind = dungeon[this.y][this.x].chars.indexOf(this);
       this.path = this.calculatePath(dungeon, this.x, this.y, targetX, targetY);
 
       if (this.path.length > 0) {
-        console.log("Path:", this.path);
+        const ind = dungeon[this.y][this.x].chars.indexOf(this);
+
         // Move NPC into next step in path
         let currNPC = this;
 
@@ -454,7 +500,6 @@ export default class Game extends React.Component {
 
         this.x = this.path[0].x;
         this.y = this.path[0].y;
-        console.log(this);
 
         // Push NPC to the top of the chars array in the new cell.
         dungeon[this.y][this.x].chars.unshift(currNPC);
@@ -463,16 +508,92 @@ export default class Game extends React.Component {
       }
       return false;
     };
-    this.initiateCombat = function(chars, targetX, targetY) {
-      let combatIntervalID = window.setInterval(() => {
-        /*
-         * the last to enter the room gets the first move -- judge by order of the
-         * chars array in current room.
-         */
-      }, 800); // run combat interval every 800ms.
+  };
 
-      return combatIntervalID; // return the combat interval to refer to later on.
-    };
+  initiateCombat = (npc, ind) => {
+    const pc = this.state.player;
+
+    console.log(`Combat initiated with NPC ${this.state.NPCs.indexOf(npc)}`);
+
+    // Insert NPC in combat turns array
+    this.state.combatTurns.unshift(npc);
+
+    // Insert the PC if it isn't already in the combatTurns array
+    if (this.state.combatTurns.indexOf(pc) == -1) {
+      this.state.combatTurns.unshift(pc);
+    }
+
+    if (!this.state.combatIntervalID) {
+      const combatIntervalID = setInterval(() => {
+        this.enterCombat();
+      }, 2000);
+      this.state.combatIntervalID = combatIntervalID;
+    }
+  };
+
+  enterCombat = () => {
+    const attacker = this.state.combatTurns[0];
+    let target;
+
+    console.log(`Combat turn: ${attacker.type}`);
+    if (attacker.type == "player") {
+      // determine player's target if not defined, or not existing in combatTurns
+      if (
+        !attacker.target ||
+        this.state.combatTurns.indexOf(attacker.target) == -1
+      ) {
+        attacker.target = this.state.combatTurns[1];
+      }
+      target = attacker.target;
+    } else {
+      target = this.state.player;
+    }
+
+    // calculate damage
+    const damage = this.calculateDamage(attacker.offense, target.defense);
+
+    console.log(
+      `${attacker.type} is dealing ${damage} damage to ${target.type}.`
+    );
+    console.log(`${target.type} now has ${target.health} health.`);
+
+    // apply damage to target's health
+    target.health = target.health - damage;
+
+    // kill target
+    if (target.health <= 0) {
+      console.log(`${attacker.type} killed ${target.type}.`);
+      if (target.type == "player") {
+        // if target is a PC, run the game over function... which
+        // doesn't yet exist
+        this.gameOver();
+      } else {
+        // if target is an NPC, kill target
+        this.killNPC(target);
+      }
+    }
+
+    // move attacker to the end of combatTurns array
+    this.state.combatTurns.splice(this.state.combatTurns[0], 1);
+    this.state.combatTurns.push(attacker);
+  };
+
+  calculateDamage = (attackerOff, targetDef) => {
+    // calculate damage by generating a random number between 1 and
+    // the attacker's offense. https://copr.fedorainfracloud.org/Subtract a number between 0 and the
+    // target's defense from the damage.
+    let damage = Math.randomBetween(1, attackerOff);
+
+    console.log(`Calculated ${damage} from attacker offense ${attackerOff}.`);
+
+    let damageResistance = Math.randomBetween(0, targetDef);
+    damage = Math.max(0, damage - Math.randomBetween(0, targetDef));
+
+    console.log(
+      `Subtracting damage resistance ${damageResistance} from target defense ${targetDef}.`
+    );
+    console.log(`Calculated damage: ${damage}.`);
+    return damage;
   };
 
   checkNPCExistsAtPoint = (x, y, arr) => {
@@ -493,7 +614,11 @@ export default class Game extends React.Component {
     // Modifies dungeon in place and generates NPCs, based on level number
     let level = this.levels[this.state.level - 1];
 
-    level.typesOfNPCs.forEach(npc => {
+    // clear current NPCs and kill any running combat intervals
+    this.state.NPCs = [];
+
+    for (let i = 0; i < level.typesOfNPCs.length; i++) {
+      const npc = level.typesOfNPCs[i];
       let numOfNPCs = Math.randomBetween(npc.min, npc.max);
       for (let i = 0; i < numOfNPCs; i++) {
         let coordinates = Grid.getRandomMatchingCellWithin(
@@ -506,6 +631,7 @@ export default class Game extends React.Component {
         );
 
         let newNPC = new this.NPC(
+          this,
           coordinates.x,
           coordinates.y,
           npc.type,
@@ -518,11 +644,12 @@ export default class Game extends React.Component {
           this.NPCs[npc.type].calculatePath
         );
         this.state.dungeon[coordinates.y][coordinates.x].chars.unshift(newNPC);
+        this.state.NPCs.push(newNPC);
 
         // Run the NPC function every {newNPC.delay}ms
-        this.setNPCInterval(newNPC);
+        this.setNPCTimeout(newNPC);
       }
-    });
+    }
   };
 
   // function to initiate and run combat as long as NPC(s) and PC are in the same
@@ -558,6 +685,7 @@ export default class Game extends React.Component {
       newY += 1;
     } else if (event.keyCode == 67) {
       // 'c' key
+      /*
       if (this.state.dungeon[y][x].chars > 0) {
         // capture a random NPC within the same cell
         const charIndex = Math.randomBetween(
@@ -567,6 +695,7 @@ export default class Game extends React.Component {
         const npc = this.state.dungeon[y][x].chars[charIndex];
         npc.paused = true;
       }
+      */
     }
 
     if (
@@ -587,6 +716,18 @@ export default class Game extends React.Component {
 
       dungeon[newY][newX].chars.unshift(this.state.player);
 
+      // once successfully moved, kill any running combat processes
+      if (this.state.combatIntervalID) {
+        clearInterval(this.state.combatIntervalID);
+        this.state.combatIntervalID = null;
+        this.state.combatTurns = [];
+      }
+
+      // initiate combat if there are NPCs in the current cell
+      if (dungeon[newY][newX].chars > 1) {
+        this.initiateCombat();
+      }
+
       this.setState({
         dungeon: dungeon
       });
@@ -595,6 +736,8 @@ export default class Game extends React.Component {
     }
     return false;
   };
+
+  gameOver = () => {};
 
   componentDidMount() {
     document.addEventListener("keydown", this.handleKeyDown);
@@ -605,7 +748,7 @@ export default class Game extends React.Component {
 
     this.state = {
       dungeon: [],
-      level: 2,
+      level: 1,
       player: {
         type: "player",
         x: 0,
@@ -613,9 +756,11 @@ export default class Game extends React.Component {
         health: 30,
         maxHealth: 30,
         offense: 8,
-        defense: 0
+        defense: 0,
+        target: null
       },
       combatIntervalID: null,
+      combatTurns: [],
       currNumOfRooms: 0,
       movementLag: 0,
       movementDelay: 0
@@ -654,7 +799,7 @@ export default class Game extends React.Component {
           {
             type: "npc1",
             min: 1,
-            max: 2
+            max: 1
           }
         ]
       },
@@ -667,8 +812,8 @@ export default class Game extends React.Component {
         typesOfNPCs: [
           {
             type: "npc1",
-            min: 3,
-            max: 5
+            min: 2,
+            max: 3
           }
         ]
       },
@@ -701,7 +846,7 @@ export default class Game extends React.Component {
         defense: 1,
         walkDelay: 750,
         runDelay: 150,
-        delay: 900,
+        delay: 5000,
         // function that returns the coordinates for the NPC's next move.
         calculatePath: function getRatCoords(dungeon, x, y, playerX, playerY) {
           // the 'rat' should be sent into a panic once the PC nears it.
@@ -749,7 +894,7 @@ export default class Game extends React.Component {
         defense: 3,
         walkDelay: 900,
         runDelay: 350,
-        delay: 1300,
+        delay: 1000,
         // return a random set of adjacent coordinates -or- coordinates directly
         // away from the PC
         calculatePath: function getKidCoords(dungeon, x, y, playerX, playerY) {
@@ -813,7 +958,7 @@ export default class Game extends React.Component {
         defense: 5,
         walkDelay: 1000,
         runDelay: 250,
-        delay: 1500,
+        delay: 2000,
         // return the coordinates farthest away from the PC
         calculatePath: function getAdultCoords(
           dungeon,
@@ -865,7 +1010,7 @@ export default class Game extends React.Component {
         health: 120,
         offense: 20,
         defense: 10,
-        delay: 1500 - (120 - 0.8 * 120) * 10,
+        delay: 2000 - (120 - 0.8 * 120) * 10,
         // return a path that leads to the PC; simulate the NPC attempting to
         // attack the PC
         calculatePath: function getBossCoords(dungeon, x, y, playerX, playerY) {
