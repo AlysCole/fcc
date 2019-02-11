@@ -1,58 +1,81 @@
 body {
-  font-family: 'Input Mono', monospace;
+  font-family: "Input Mono", monospace;
   text-align: center;
   background: black;
-  color: #8CFF02; }
+  color: #8CFF02;
+}
 
 span {
   text-align: center;
   letter-spacing: 8px;
-  padding: 8px auto; }
+  padding: 8px auto;
+}
 
 #game {
-  overflow: hidden; }
+  overflow: hidden;
+}
 
 .cell {
-  background: #DED9D6; }
+  background: #DED9D6;
+}
 
 .room-cell {
-  color: transparent; }
+  color: rgba(0, 0, 0, 0);
+}
 
 .hidden-room-cell {
   color: #648A64;
-  animation: blink 1s step-start 0s infinite; }
+  animation: blink 1s step-start 0s infinite;
+}
 
 @keyframes blink {
   50% {
-    color: transparent; } }
-
+    color: rgba(0, 0, 0, 0);
+  }
+}
 .wall-cell {
-  color: #648A64; }
+  color: #648A64;
+}
 
 .null-cell {
-  color: transparent;
-  background: none; }
+  color: rgba(0, 0, 0, 0);
+  background: none;
+}
 
 .empty-cell {
-  color: rgba(0, 0, 0, 0.5); }
+  color: rgba(0, 0, 0, 0.5);
+}
 
 .monster1-cell, .monster2-cell, .monster3-cell, .boss-monster-cell {
-  color: #C40F0F; }
+  color: #C40F0F;
+}
 
-.health-bar-container {
+.top-bar {
+  position: fixed;
+  width: 100%;
+  height: 100px;
+}
+
+.healthbar-container {
   width: 100px;
   height: 20px;
   color: black;
   border: 2px solid #282A2E;
-  text-align: left; }
+  text-align: left;
+}
 
-.health-bar-fill {
+.healthbar-fill {
   display: inline-block;
   border: 1px solid black;
   box-sizing: border-box;
   margin: 0;
   height: 100%;
   width: 10px;
-  background: green; }
+  background: red;
+}
 
-/*# sourceMappingURL=styles.css.map*/
+.player-healthbar {
+  background: green;
+}
+
+/*# sourceMappingURL=styles.css.map */

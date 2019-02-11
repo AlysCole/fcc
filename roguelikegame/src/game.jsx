@@ -1,5 +1,5 @@
 const Grid = require("./Grid");
-const utilities = require("./utilities");
+const Utility = require("./Utility");
 import React from "react";
 import HealthBar from "./healthbar.jsx";
 import Viewport from "./viewport/index.jsx";
@@ -10,58 +10,6 @@ export default class Game extends React.Component {
     return this.state.dungeon[this.state.player.y][this.state.player.x];
   };
 
-  killNPC = npc => {
-    let ind = this.state.NPCs.indexOf(npc);
-    let combatIntervalID = this.state.combatIntervalID;
-    let combatTurns = this.state.combatTurns;
-    let dungeon = this.state.dungeon;
-
-    if (ind > -1) {
-      combatTurns = combatTurns.remove(npc);
-      // stop combat if no other NPCs are engaged in combat
-      if (combatTurns.length <= 1) {
-        clearInterval(combatIntervalID);
-        combatIntervalID = null;
-        combatTurns = [];
-      }
-
-      // remove from dungeon
-      dungeon[npc.y][npc.x].chars.splice(
-        dungeon[npc.y][npc.x].chars.indexOf(npc),
-        1
-      );
-
-      this.setState({
-        NPCs: this.state.NPCs.remove(npc),
-        dungeon: dungeon,
-        combatIntervalID: combatIntervalID,
-        combatTurns: combatTurns
-      });
-    }
-  };
-
-  setNPCTimeout = npc => {
-    // break out of function if NPC no longer exists
-    if (this.state.NPCs.indexOf(npc) === -1) return false;
-
-    window.setTimeout(() => {
-      const dungeon = npc.update(
-        this.state.dungeon,
-        this.state.player.x,
-        this.state.player.y
-      );
-      if (dungeon) {
-        this.setState({
-          dungeon: dungeon
-        });
-      }
-      npc.moveTimeout = window.setTimeout(
-        () => this.setNPCTimeout(npc),
-        npc.delay
-      );
-    });
-  };
-
   initializeDungeon = () => {
     if (this.state.dungeon.length == 0) {
       for (let y = 0; y < this.config.gridHeight; y++) {
@@ -69,7 +17,8 @@ export default class Game extends React.Component {
         for (let x = 0; x < this.config.gridWidth; x++) {
           arr.push({
             type: "empty",
-            chars: []
+            chars: [],
+            items: []
           });
         }
         this.state.dungeon.push(arr);
@@ -510,6 +459,28 @@ export default class Game extends React.Component {
     };
   };
 
+  setNPCTimeout = npc => {
+    // break out of function if NPC no longer exists
+    if (this.state.NPCs.indexOf(npc) === -1) return false;
+
+    window.setTimeout(() => {
+      const dungeon = npc.update(
+        this.state.dungeon,
+        this.state.player.x,
+        this.state.player.y
+      );
+      if (dungeon) {
+        this.setState({
+          dungeon: dungeon
+        });
+      }
+      npc.moveTimeout = window.setTimeout(
+        () => this.setNPCTimeout(npc),
+        npc.delay
+      );
+    });
+  };
+
   initiateCombat = (npc, ind) => {
     const pc = this.state.player;
 
@@ -595,6 +566,68 @@ export default class Game extends React.Component {
     console.log(`Calculated damage: ${damage}.`);
     return damage;
   };
+
+  killNPC = npc => {
+    let ind = this.state.NPCs.indexOf(npc);
+    let combatIntervalID = this.state.combatIntervalID;
+    let combatTurns = this.state.combatTurns;
+    let dungeon = this.state.dungeon;
+
+    if (ind > -1) {
+      combatTurns = combatTurns.remove(npc);
+      // stop combat if no other NPCs are engaged in combat
+      if (combatTurns.length <= 1) {
+        clearInterval(combatIntervalID);
+        combatIntervalID = null;
+        combatTurns = [];
+      }
+
+      // remove from dungeon
+      dungeon[npc.y][npc.x].chars.splice(
+        dungeon[npc.y][npc.x].chars.indexOf(npc),
+        1
+      );
+
+      // drop random item in place of NPC
+      dungeon[npc.y][npc.x].items.concat(this.loadDrops(npc));
+
+      this.setState({
+        NPCs: this.state.NPCs.remove(npc),
+        dungeon: dungeon,
+        combatIntervalID: combatIntervalID,
+        combatTurns: combatTurns
+      });
+    }
+  };
+
+  loadDrops = npc => {
+    // load items in place of NPC
+    let dropsLoaded = [];
+
+    for (let type in this.NPCs[npc.type].drops) {
+      if (Math.checkPercentage(this.NPCs[npc.type].drops[type])) {
+        // generate drop based on its possible parameters in this.items
+        let drop = this.generateDrop(type);
+        dropsLoaded.push(drop);
+      }
+    }
+
+    if (dropsLoaded.length > 0) {
+      // print the names of the objects dropped:
+      dropsLoaded = dropsLoaded.map(drop => {
+        return drop.prefixArticle();
+      });
+      let dropsStr = dropsLoaded.join(", ");
+      const ind = dropsStr.lastIndexOf(", ");
+      let npcString = this.NPCs[npc.type].prefixArticle();
+
+      dropsStr = dropsStr.slice(0, ind) + ", and" + dropsStr.slice(ind + 1);
+
+      console.log(`${npcString} drops ${dropsStr}.`.capitalizeFirstLetter());
+    }
+  };
+
+  generateDrop = dropType => {};
 
   checkNPCExistsAtPoint = (x, y, arr) => {
     return (
@@ -842,11 +875,16 @@ export default class Game extends React.Component {
       npc1: {
         name: "rat",
         health: 20,
-        offense: 4,
+        offense: 2,
         defense: 1,
         walkDelay: 750,
         runDelay: 150,
         delay: 5000,
+        drops: {
+          bloodBag1: 100, // percentage likely to drop
+          ratFang: 100,
+          ratHide: 100
+        },
         // function that returns the coordinates for the NPC's next move.
         calculatePath: function getRatCoords(dungeon, x, y, playerX, playerY) {
           // the 'rat' should be sent into a panic once the PC nears it.
@@ -1031,6 +1069,25 @@ export default class Game extends React.Component {
       }
     };
 
+    this.items = {
+      bloodBag1: {
+        name: "blood bag",
+        minHealthRestore: 10, // restores health
+        maxHealthRestore: 15,
+        maxHealth: 10 // boosts max. health
+      },
+      ratFang: {
+        name: "rat fang",
+        minOffense: 10, // adds to offense
+        maxOffense: 10
+      },
+      ratHide: {
+        name: "rat hide",
+        minDefense: 5,
+        maxDefense: 5
+      }
+    };
+
     this.initializeDungeon();
 
     let center = Grid.getRandomMatchingCellWithin(
@@ -1051,16 +1108,31 @@ export default class Game extends React.Component {
     return (
       <div className="game">
         <div className="top-bar">
-          {this.getPlayerCell().chars.map((char, ind) => {
-            return (
+          <div className="left">
+            {
               <HealthBar
-                type={char.type}
-                key={ind}
-                currHP={char.health}
-                maxHP={char.maxHealth}
+                type="player"
+                currHP={this.state.player.health}
+                maxHP={this.state.player.maxHealth}
               />
-            );
-          })}
+            }
+          </div>
+          <div className="right">
+            {this.getPlayerCell().chars.map((char, ind) => {
+              if (char.type == "player") return false;
+              console.log(
+                `Generating a health bar for character type ${char.type}.`
+              );
+              return (
+                <HealthBar
+                  type={char.type}
+                  key={ind}
+                  currHP={char.health}
+                  maxHP={char.maxHealth}
+                />
+              );
+            })}
+          </div>
         </div>
         <Viewport
           dungeon={this.state.dungeon}
