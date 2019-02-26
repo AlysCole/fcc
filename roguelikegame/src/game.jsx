@@ -10,6 +10,26 @@ export default class Game extends React.Component {
     return this.state.dungeon[this.state.player.y][this.state.player.x];
   };
 
+  getNPCsInCell = (x, y, dungeon) => {
+    if (!dungeon) dungeon = this.state.dungeon;
+
+    let npcs = [];
+
+    for (let i = 0; i < dungeon[y][x].chars.length; i++) {
+      let char = dungeon[y][x].chars[i];
+      if (char.type != "player") {
+        npcs.push(char);
+      }
+    }
+
+    return npcs;
+  };
+
+  sendToPlayer = msg => {
+    // for the meantime, just console.log this
+    console.log("[Message bar] " + msg);
+  };
+
   initializeDungeon = () => {
     if (this.state.dungeon.length == 0) {
       for (let y = 0; y < this.config.gridHeight; y++) {
@@ -420,7 +440,7 @@ export default class Game extends React.Component {
 
       if (this.x == targetX && this.y == targetY) {
         const ind = game.state.combatTurns.indexOf(this);
-        if (ind == -1) game.initiateCombat(this, ind);
+        if (ind == -1) game.initiateCombat(this);
         return false;
       } else if (this.x != targetX || this.y != targetY) {
         if (game.state.combatIntervalID) {
@@ -481,13 +501,17 @@ export default class Game extends React.Component {
     });
   };
 
-  initiateCombat = (npc, ind) => {
+  initiateCombat = npc => {
     const pc = this.state.player;
+
+    if (this.state.NPCs.indexOf(npc) == -1) return false;
 
     console.log(`Combat initiated with NPC ${this.state.NPCs.indexOf(npc)}`);
 
     // Insert NPC in combat turns array
-    this.state.combatTurns.unshift(npc);
+    if (this.state.combatTurns.indexOf(npc) == -1) {
+      this.state.combatTurns.unshift(npc);
+    }
 
     // Insert the PC if it isn't already in the combatTurns array
     if (this.state.combatTurns.indexOf(pc) == -1) {
@@ -569,11 +593,16 @@ export default class Game extends React.Component {
 
   killNPC = npc => {
     let ind = this.state.NPCs.indexOf(npc);
+    let NPCs = this.state.NPCs;
     let combatIntervalID = this.state.combatIntervalID;
     let combatTurns = this.state.combatTurns;
     let dungeon = this.state.dungeon;
 
     if (ind > -1) {
+      NPCs = NPCs.remove(npc);
+    }
+
+    if (combatTurns.indexOf(npc) > -1) {
       combatTurns = combatTurns.remove(npc);
       // stop combat if no other NPCs are engaged in combat
       if (combatTurns.length <= 1) {
@@ -581,7 +610,9 @@ export default class Game extends React.Component {
         combatIntervalID = null;
         combatTurns = [];
       }
+    }
 
+    if (dungeon[npc.y][npc.x].chars.indexOf(npc) > -1) {
       // remove from dungeon
       dungeon[npc.y][npc.x].chars.splice(
         dungeon[npc.y][npc.x].chars.indexOf(npc),
@@ -589,15 +620,19 @@ export default class Game extends React.Component {
       );
 
       // drop random item in place of NPC
-      dungeon[npc.y][npc.x].items.concat(this.loadDrops(npc));
-
-      this.setState({
-        NPCs: this.state.NPCs.remove(npc),
-        dungeon: dungeon,
-        combatIntervalID: combatIntervalID,
-        combatTurns: combatTurns
-      });
+      dungeon[npc.y][npc.x].items = dungeon[npc.y][npc.x].items.concat(
+        this.loadDrops(npc)
+      );
     }
+
+    this.setState({
+      NPCs: this.state.NPCs.remove(npc),
+      dungeon: dungeon,
+      combatIntervalID: combatIntervalID,
+      combatTurns: combatTurns
+    });
+
+    if (this.state.NPCs.length === 0) this.placeLevelPortal();
   };
 
   loadDrops = npc => {
@@ -614,20 +649,67 @@ export default class Game extends React.Component {
 
     if (dropsLoaded.length > 0) {
       // print the names of the objects dropped:
-      dropsLoaded = dropsLoaded.map(drop => {
-        return drop.prefixArticle();
+      const dropsNames = dropsLoaded.map(drop => {
+        return drop.name.prefixArticle();
       });
-      let dropsStr = dropsLoaded.join(", ");
+      let dropsStr = dropsNames.join(", ");
       const ind = dropsStr.lastIndexOf(", ");
-      let npcString = this.NPCs[npc.type].prefixArticle();
+      let npcString = this.NPCs[npc.type].name.prefixArticle();
 
       dropsStr = dropsStr.slice(0, ind) + ", and" + dropsStr.slice(ind + 1);
 
-      console.log(`${npcString} drops ${dropsStr}.`.capitalizeFirstLetter());
+      this.sendToPlayer(
+        `${npcString} drops ${dropsStr}.`.capitalizeFirstLetter()
+      );
     }
+
+    return dropsLoaded;
   };
 
-  generateDrop = dropType => {};
+  generateDrop = dropType => {
+    let dropParams = this.items[dropType];
+
+    let drop = {
+      dropType: dropType,
+      name: dropParams.name,
+      health: 0,
+      maxHealth: 0,
+      offense: 0,
+      defense: 0
+    };
+
+    if (dropParams.healthMin && dropParams.healthMax) {
+      drop.health = Math.randomBetween(
+        dropParams.healthMin,
+        dropParams.healthMax
+      );
+    }
+
+    if (dropParams.maxHealthMin && dropParams.maxHealthMax) {
+      drop.maxHealth = Math.randomBetween(
+        dropParams.maxHealthMin,
+        dropParams.maxHealthMax
+      );
+    }
+
+    if (dropParams.offenseMin && dropParams.offenseMax) {
+      drop.offense = Math.randomBetween(
+        dropParams.offenseMin,
+        dropParams.offenseMax
+      );
+    }
+
+    if (dropParams.defenseMin && dropParams.defenseMax) {
+      drop.defense = Math.randomBetween(
+        dropParams.defenseMin,
+        dropParams.defenseMax
+      );
+    }
+
+    return drop;
+  };
+
+  placeLevelPortal = () => {};
 
   checkNPCExistsAtPoint = (x, y, arr) => {
     return (
@@ -739,6 +821,7 @@ export default class Game extends React.Component {
         this.state.dungeon[newY][newX].type == "corridor")
     ) {
       let dungeon = this.state.dungeon;
+      let player = this.state.player;
 
       dungeon[y][x].chars.splice(
         dungeon[y][x].chars.indexOf(this.state.player),
@@ -757,12 +840,54 @@ export default class Game extends React.Component {
       }
 
       // initiate combat if there are NPCs in the current cell
-      if (dungeon[newY][newX].chars > 1) {
-        this.initiateCombat();
+      if (dungeon[newY][newX].chars.length > 1) {
+        for (let i = 0; i < dungeon[newY][newX].chars.length; i++) {
+          let char = dungeon[newY][newX].chars[i];
+
+          if (char.type != "player") {
+            this.initiateCombat(char);
+          }
+        }
+      }
+
+      if (dungeon[newY][newX].items.length > 0) {
+        // loop through drops in new room
+        for (let key in dungeon[newY][newX].items) {
+          const drop = dungeon[newY][newX].items[key];
+
+          // loop through values of drop object
+          for (let paramKey in drop) {
+            if (drop.hasOwnProperty(paramKey)) {
+              // apply each value to the player object
+              if (player.hasOwnProperty(paramKey)) {
+                console.log(
+                  `Applying ${drop[paramKey]} to player's ${paramKey}.`
+                );
+
+                console.log(
+                  `Previous player's ${paramKey}: ${player[paramKey]}`
+                );
+                player[paramKey] = player[paramKey] + drop[paramKey];
+                console.log(
+                  `Updated player's ${paramKey}: ${player[paramKey]}`
+                );
+
+                const dropString = drop.name.prefixArticle();
+                this.sendToPlayer(`You receive ${dropString}!`);
+              }
+            }
+          }
+        }
+
+        dungeon[newY][newX].items = [];
+
+        console.log("Updated player object:");
+        console.log(player);
       }
 
       this.setState({
-        dungeon: dungeon
+        dungeon: dungeon,
+        player: player
       });
 
       return true;
@@ -908,7 +1033,7 @@ export default class Game extends React.Component {
           // return the path with a random set of coordinates if the PC is
           // within view OR out of a 3 out of 10 possibility
           if (
-            (distance < 5 && dungeon[playerY][playerX].type != "hiddenRoom") ||
+            (distance < 2 && dungeon[playerY][playerX].type != "hiddenRoom") ||
             Math.random() < 0.3
           ) {
             // push a random set of adjacent coordinates to the path
@@ -1072,19 +1197,20 @@ export default class Game extends React.Component {
     this.items = {
       bloodBag1: {
         name: "blood bag",
-        minHealthRestore: 10, // restores health
-        maxHealthRestore: 15,
-        maxHealth: 10 // boosts max. health
+        healthMin: 10, // restores health, generating from min
+        healthMax: 15, // to max
+        maxHealthMin: 10, // boosts max. health
+        maxHealthMax: 10
       },
       ratFang: {
         name: "rat fang",
-        minOffense: 10, // adds to offense
-        maxOffense: 10
+        offenseMin: 10, // adds to offense
+        offenseMax: 10
       },
       ratHide: {
         name: "rat hide",
-        minDefense: 5,
-        maxDefense: 5
+        defenseMin: 5,
+        defenseMax: 5
       }
     };
 

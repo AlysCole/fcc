@@ -27,6 +27,10 @@ export default class Viewport extends React.Component {
         } else if (dungeon && dungeon[y] && dungeon[y][x]) {
           if (dungeon[y][x].chars.length > 0) {
             cellsInRow.push(dungeon[y][x].chars[0].type);
+          } else if (dungeon[y][x].items.length > 0) {
+            // push the last item as the visible symbol in the cell
+            const items = dungeon[y][x].items;
+            cellsInRow.push("drop");
           } else if (dungeon[y][x].type == "hiddenRoom") {
             // check if the cell is a hidden room
             let distance = Grid.calculateApproxDistance(x, y, centerX, centerY);
@@ -97,6 +101,7 @@ export default class Viewport extends React.Component {
       null: ".",
       empty: ".",
       player: "@",
+      drop: "!",
       npc1: "!",
       npc2: "!",
       npc3: "!",
@@ -110,6 +115,7 @@ export default class Viewport extends React.Component {
       null: "null-cell",
       empty: "empty-cell",
       player: "player-cell",
+      drop: "drop-cell",
       npc1: "monster1-cell",
       npc2: "monster2-cell",
       npc3: "monster3-cell",
