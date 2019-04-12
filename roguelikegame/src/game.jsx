@@ -10,6 +10,20 @@ export default class Game extends React.Component {
     return this.state.dungeon[this.state.player.y][this.state.player.x];
   };
 
+  getRandomEmptyRoomCoords = () => {
+    let x = Math.randomBetween(0, this.config.gridWidth);
+    let y = Math.randomBetween(0, this.config.gridHeight);
+    while (
+      !this.isCellEmpty(this.state.dungeon[y][x]) &&
+      this.state.dungeon[y][x].type != "room"
+    ) {
+      x = Math.randomBetween(0, this.config.gridWidth);
+      y = Math.randomBetween(0, this.config.gridHeight);
+    }
+
+    return { x: x, y: y };
+  };
+
   getNPCsInCell = (x, y, dungeon) => {
     if (!dungeon) dungeon = this.state.dungeon;
 
@@ -23,6 +37,10 @@ export default class Game extends React.Component {
     }
 
     return npcs;
+  };
+
+  isCellEmpty = cell => {
+    return cell.chars.length == 0 && cell.items.length == 0;
   };
 
   sendToPlayer = msg => {
@@ -399,6 +417,19 @@ export default class Game extends React.Component {
     return false;
   };
 
+  startLevel = () => {
+    this.initializeDungeon();
+
+    return Grid.getRandomMatchingCellWithin(
+      0,
+      this.state.dungeon[0].length - 1,
+      0,
+      this.state.dungeon.length - 1,
+      "room",
+      this.state.dungeon
+    );
+  };
+
   NPC = function createNPC(
     game,
     x,
@@ -621,21 +652,23 @@ export default class Game extends React.Component {
 
       // drop random item in place of NPC
       dungeon[npc.y][npc.x].items = dungeon[npc.y][npc.x].items.concat(
-        this.loadDrops(npc)
+        this.generateDrops(npc)
       );
     }
 
+    if (NPCs.length <= 1) dungeon = this.placeLevelPortal(dungeon);
+
     this.setState({
-      NPCs: this.state.NPCs.remove(npc),
+      NPCs: NPCs,
       dungeon: dungeon,
       combatIntervalID: combatIntervalID,
       combatTurns: combatTurns
     });
 
-    if (this.state.NPCs.length === 0) this.placeLevelPortal();
+    console.log("NPCs:", this.state.NPCs);
   };
 
-  loadDrops = npc => {
+  generateDrops = npc => {
     // load items in place of NPC
     let dropsLoaded = [];
 
@@ -671,11 +704,7 @@ export default class Game extends React.Component {
 
     let drop = {
       dropType: dropType,
-      name: dropParams.name,
-      health: 0,
-      maxHealth: 0,
-      offense: 0,
-      defense: 0
+      name: dropParams.name
     };
 
     if (dropParams.healthMin && dropParams.healthMax) {
@@ -709,7 +738,15 @@ export default class Game extends React.Component {
     return drop;
   };
 
-  placeLevelPortal = () => {};
+  placeLevelPortal = dungeon => {
+    let { x, y } = this.getRandomEmptyRoomCoords();
+
+    console.log(`Placing a portal in coordinates {${x}, ${y}}.`);
+
+    dungeon[y][x].type = "portal";
+
+    return dungeon;
+  };
 
   checkNPCExistsAtPoint = (x, y, arr) => {
     return (
@@ -813,84 +850,101 @@ export default class Game extends React.Component {
       */
     }
 
-    if (
-      this.state.dungeon[newY] &&
-      this.state.dungeon[newY][newX] &&
-      (this.state.dungeon[newY][newX].type == "room" ||
+    if (this.state.dungeon[newY] && this.state.dungeon[newY][newX]) {
+      if (
+        this.state.dungeon[newY][newX].type == "room" ||
         this.state.dungeon[newY][newX].type == "hiddenRoom" ||
-        this.state.dungeon[newY][newX].type == "corridor")
-    ) {
-      let dungeon = this.state.dungeon;
-      let player = this.state.player;
+        this.state.dungeon[newY][newX].type == "corridor"
+      ) {
+        let dungeon = this.state.dungeon;
+        let player = this.state.player;
 
-      dungeon[y][x].chars.splice(
-        dungeon[y][x].chars.indexOf(this.state.player),
-        1
-      );
+        dungeon[y][x].chars.splice(
+          dungeon[y][x].chars.indexOf(this.state.player),
+          1
+        );
 
-      (this.state.player.x = newX), (this.state.player.y = newY);
+        (this.state.player.x = newX), (this.state.player.y = newY);
 
-      dungeon[newY][newX].chars.unshift(this.state.player);
+        dungeon[newY][newX].chars.unshift(this.state.player);
 
-      // once successfully moved, kill any running combat processes
-      if (this.state.combatIntervalID) {
-        clearInterval(this.state.combatIntervalID);
-        this.state.combatIntervalID = null;
-        this.state.combatTurns = [];
-      }
-
-      // initiate combat if there are NPCs in the current cell
-      if (dungeon[newY][newX].chars.length > 1) {
-        for (let i = 0; i < dungeon[newY][newX].chars.length; i++) {
-          let char = dungeon[newY][newX].chars[i];
-
-          if (char.type != "player") {
-            this.initiateCombat(char);
-          }
+        // once successfully moved, kill any running combat processes
+        if (this.state.combatIntervalID) {
+          clearInterval(this.state.combatIntervalID);
+          this.state.combatIntervalID = null;
+          this.state.combatTurns = [];
         }
-      }
 
-      if (dungeon[newY][newX].items.length > 0) {
-        // loop through drops in new room
-        for (let key in dungeon[newY][newX].items) {
-          const drop = dungeon[newY][newX].items[key];
+        // initiate combat if there are NPCs in the current cell
+        if (dungeon[newY][newX].chars.length > 1) {
+          for (let i = 0; i < dungeon[newY][newX].chars.length; i++) {
+            let char = dungeon[newY][newX].chars[i];
 
-          // loop through values of drop object
-          for (let paramKey in drop) {
-            if (drop.hasOwnProperty(paramKey)) {
-              // apply each value to the player object
-              if (player.hasOwnProperty(paramKey)) {
-                console.log(
-                  `Applying ${drop[paramKey]} to player's ${paramKey}.`
-                );
-
-                console.log(
-                  `Previous player's ${paramKey}: ${player[paramKey]}`
-                );
-                player[paramKey] = player[paramKey] + drop[paramKey];
-                console.log(
-                  `Updated player's ${paramKey}: ${player[paramKey]}`
-                );
-
-                const dropString = drop.name.prefixArticle();
-                this.sendToPlayer(`You receive ${dropString}!`);
-              }
+            if (char.type != "player") {
+              this.initiateCombat(char);
             }
           }
         }
 
-        dungeon[newY][newX].items = [];
+        if (dungeon[newY][newX].items.length > 0) {
+          // loop through drops in new room
+          for (let key in dungeon[newY][newX].items) {
+            if (dungeon[newY][newX].items.hasOwnProperty(key)) {
+              const drop = dungeon[newY][newX].items[key];
 
-        console.log("Updated player object:");
-        console.log(player);
+              const dropString = drop.name.prefixArticle();
+              this.sendToPlayer(`You receive ${dropString}!`);
+              // loop through values of drop object
+              for (let paramKey in drop) {
+                if (drop.hasOwnProperty(paramKey)) {
+                  // apply each value to the player object
+                  if (player.hasOwnProperty(paramKey)) {
+                    console.log(
+                      `Applying ${drop[paramKey]} to player's ${paramKey}.`
+                    );
+
+                    console.log(
+                      `Previous player's ${paramKey}: ${player[paramKey]}`
+                    );
+                    player[paramKey] = player[paramKey] + drop[paramKey];
+                    console.log(
+                      `Updated player's ${paramKey}: ${player[paramKey]}`
+                    );
+                  }
+                }
+              }
+            }
+          }
+
+          dungeon[newY][newX].items = [];
+
+          console.log("Updated player object:");
+          console.log(player);
+        }
+
+        this.setState({
+          dungeon: dungeon,
+          player: player
+        });
+
+        return true;
+      } else if (this.state.dungeon[newY][newX].type == "portal") {
+        const level = this.state.level + 1;
+        const center = this.startLevel();
+        let player = this.state.player;
+        let dungeon = this.state.dungeon;
+
+        player.x = center.x;
+        player.y = center.y;
+
+        dungeon[player.y][player.x].chars.unshift(player);
+
+        this.setState({
+          dungeon: dungeon,
+          player: player,
+          level: level
+        });
       }
-
-      this.setState({
-        dungeon: dungeon,
-        player: player
-      });
-
-      return true;
     }
     return false;
   };
@@ -1214,19 +1268,10 @@ export default class Game extends React.Component {
       }
     };
 
-    this.initializeDungeon();
+    const center = this.startLevel();
 
-    let center = Grid.getRandomMatchingCellWithin(
-      0,
-      this.state.dungeon[0].length - 1,
-      0,
-      this.state.dungeon.length - 1,
-      "room",
-      this.state.dungeon
-    );
     this.state.player.x = center.x;
     this.state.player.y = center.y;
-
     this.state.dungeon[center.y][center.x].chars.unshift(this.state.player);
   }
 

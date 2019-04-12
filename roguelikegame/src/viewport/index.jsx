@@ -105,7 +105,8 @@ export default class Viewport extends React.Component {
       npc1: "!",
       npc2: "!",
       npc3: "!",
-      bossMonster: "!"
+      bossMonster: "!",
+      portal: "^"
     };
 
     this.classNames = {
@@ -119,7 +120,8 @@ export default class Viewport extends React.Component {
       npc1: "monster1-cell",
       npc2: "monster2-cell",
       npc3: "monster3-cell",
-      bossMonster: "boss-monster-cell"
+      bossMonster: "boss-monster-cell",
+      portal: "portal-cell"
     };
 
     // Make sure radius is within the viewport size.
